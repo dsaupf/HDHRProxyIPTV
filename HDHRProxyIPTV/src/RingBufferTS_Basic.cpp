@@ -38,9 +38,6 @@ CRingBufferTS_Basic::CRingBufferTS_Basic()
 	m_pidsToFilterList.Format(L"");
 	m_applyPidFiltering = 0;
 
-	m_BusySpaceCopy = 0;
-	m_posReadCopy = 0;
-
 	memset(m_buffer_output, 0, sizeof(m_buffer_output));
 	m_numTSPacketsOutput = 0;
 
@@ -78,9 +75,6 @@ void CRingBufferTS_Basic::Initialize(CString pidsToFilterList)
 	m_freeSpace = m_bufferSize;
 	m_BusySpace = 0;
 
-	m_BusySpaceCopy = 0;
-	m_posReadCopy = 0;
-
 	m_pidsToFilterList = pidsToFilterList;
 }
 
@@ -93,14 +87,12 @@ int CRingBufferTS_Basic::Insert(char* data, int size)
 	{
 		if (m_BusySpace + size < m_bufferSize)
 		{
-			memcpy(&m_buffer[0], &m_buffer[m_posRead], m_BusySpace);
+			memmove(&m_buffer[0], &m_buffer[m_posRead], m_BusySpace);
 
 			m_posWrite = m_BusySpace - 1;
 			m_posWrite = m_BusySpace;
 			m_posRead = 0;
 			m_freeSpace = m_bufferSize - m_BusySpace;
-
-			m_posReadCopy = 0;
 		}
 		else
 			return 0;
@@ -113,14 +105,13 @@ int CRingBufferTS_Basic::Insert(char* data, int size)
 	m_freeSpace -= size;
 	m_BusySpace += size;
 
-	m_BusySpaceCopy = m_BusySpace;
 	m_receivedPackets += size / 188;
 
 	if (m_Traces->IsLevelWriteable(LEVEL_TRZ_6))
 	{
 		char log_output[1024];
 		memset(log_output, 0, 1024);
-		_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Saved in Ring Buffer:     %d bytes.\n", m_tuner,size);
+		_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Saved in Ring Buffer  <<< %5d bytes.\n", m_tuner,size);
 		m_Traces->WriteTrace(log_output, LEVEL_TRZ_6);
 	}
 
@@ -168,10 +159,6 @@ int CRingBufferTS_Basic::GetData(char* data, int size)
 		memcpy(data, &m_buffer[m_posRead], size);
 		m_posRead += size;
 		m_BusySpace -= size;
-
-		m_posReadCopy = m_posRead;
-		m_BusySpaceCopy = m_BusySpace;
-
 	}
 	else
 		return 0;
@@ -181,7 +168,7 @@ int CRingBufferTS_Basic::GetData(char* data, int size)
 
 int CRingBufferTS_Basic::GetMultipleTSPacket(char* data, int numMaxPackets)
 {
-	char packet[1316];
+	char packet[188];
 	int numTSPackets = 0;
 	char log_output[1024];
 	memset(log_output, 0, 1024);
@@ -247,25 +234,16 @@ int CRingBufferTS_Basic::GetMultipleTSPacket(char* data, int numMaxPackets)
 	}
 
 #ifdef AddPaddingToTSPacket
-//	if ((numTSPackets != 0) && (numTSPackets < NUM_PACKETS_TO_SEND))
 	int numDummyPackets = (NUM_PACKETS_TO_SEND - (numTSPackets % NUM_PACKETS_TO_SEND));
 	if ((numTSPackets != 0) && (numDummyPackets < NUM_PACKETS_TO_SEND))
 	{
-		char* nullPaddingPckt = new char[numDummyPackets * 188];
-		memset(nullPaddingPckt, 0, numDummyPackets * 188);
-
-		GenerateNullPaddingTSPackets(nullPaddingPckt, numDummyPackets);
-
-		memcpy(&data[numTSPackets * 188], nullPaddingPckt, numDummyPackets * 188);
+		GenerateNullPaddingTSPackets(&data[numTSPackets * 188], numDummyPackets);
 
 		if (m_Traces->IsLevelWriteable(LEVEL_TRZ_5))
 		{
 			_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Adding %d null padding TS Packets to arrive at 7 packets to send (%d total packets).\n", m_tuner, numDummyPackets, numTSPackets);
 			m_Traces->WriteTrace(log_output, LEVEL_TRZ_5);
 		}
-
-		if (nullPaddingPckt)
-			delete[] nullPaddingPckt;
 
 		numTSPackets += numDummyPackets;
 		m_nullPacketsSent += numDummyPackets;
@@ -297,11 +275,11 @@ void CRingBufferTS_Basic::GenerateNullPaddingTSPackets(char* data, int numPacket
 	datagram[0] = 'G'; 
 	//2 bytes: PID Number. Value 0x1FFF -> Null Packet (used for fixed bandwidth padding)
 	datagram[1] = '\x1f';
-	datagram[2] = 'ÿ';
-	//Special byte 0x1C. (It's Continuity Counter but I fix de value)
+	datagram[2] = '\xff';
+	//Special byte 0x1C. (It's a Fake Continuity Counter)
 	datagram[3] = '\x1c';
 
-	memset(&data[4], 0, 184);
+	memset(&data[4], 0xFF, 184);
 
 	//Return number of null packets required
 	for (i = 0; i < numPackets; i++)
@@ -557,10 +535,10 @@ int CRingBufferTS_Basic::CheckTimeToAnalyzeData()
 			{
 					m_receivedPackets = m_filteredPacketsSent;
 			}
-			_snprintf(trace, sizeof(trace) - 2, "TRANSPORT  :: [Tuner %d] ALL DATA  : Packets: sent data %d, send padding %d, total received %d, total lookaheads %d\n", m_tuner, m_filteredPacketsSent, m_nullPacketsSent, m_receivedPackets, m_lockaheads);
+			_snprintf(trace, sizeof(trace) - 2, "TRANSPORT  :: [Tuner %d] ALL DATA  : Packets: sent data %05d, send padding %4d, total received %05d, total lookaheads %3d\n", m_tuner, m_filteredPacketsSent, m_nullPacketsSent, m_receivedPackets, m_lockaheads);
 		}
 		else
-			_snprintf(trace, sizeof(trace) - 2, "TRANSPORT  :: [Tuner %d] FILTERING : Packets: sent data %d, send padding %d, filtered out %d, total received %d, total sended %d, total lookaheads %d\n", m_tuner, m_filteredPacketsSent, m_nullPacketsSent, /*m_filteredOutPacketsDescarted*/m_receivedPackets - m_filteredPacketsSent, m_receivedPackets, m_filteredPacketsSent + m_nullPacketsSent, m_lockaheads);
+			_snprintf(trace, sizeof(trace) - 2, "TRANSPORT  :: [Tuner %d] FILTERING : Packets: sent data %05d, send padding %4d, filtered out %05d, total received %05d, total sended %d, total lookaheads %3d\n", m_tuner, m_filteredPacketsSent, m_nullPacketsSent, /*m_filteredOutPacketsDescarted*/m_receivedPackets - m_filteredPacketsSent, m_receivedPackets, m_filteredPacketsSent + m_nullPacketsSent, m_lockaheads);
 		
 		m_Traces->WriteTrace(trace, LEVEL_TRZ_3);
 
