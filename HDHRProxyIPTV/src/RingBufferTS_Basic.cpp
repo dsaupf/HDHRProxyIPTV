@@ -83,13 +83,12 @@ int CRingBufferTS_Basic::Insert(char* data, int size)
 	if ( size  < 0 ) return 0;
 	if ( size == 0 ) return 1;
 
-	if (size > m_freeSpace)
+	if (size >= m_freeSpace)
 	{
 		if (m_BusySpace + size < m_bufferSize)
 		{
 			memmove(&m_buffer[0], &m_buffer[m_posRead], m_BusySpace);
 
-			m_posWrite = m_BusySpace - 1;
 			m_posWrite = m_BusySpace;
 			m_posRead = 0;
 			m_freeSpace = m_bufferSize - m_BusySpace;
