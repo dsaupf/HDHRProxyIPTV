@@ -1141,6 +1141,7 @@ int CTransport::TreatReceivedDataHTTP()
 							0, (SOCKADDR *)& RecvAddr, sizeof(RecvAddr));
 						if (res == SOCKET_ERROR)
 						{
+							m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Write socket re-try.\n", LEVEL_TRZ_3);
 							Sleep(50);
 							ntry++;
 						}
@@ -1156,7 +1157,7 @@ int CTransport::TreatReceivedDataHTTP()
 
 					if (m_Traces->IsLevelWriteable(LEVEL_TRZ_5))
 					{
-						_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Sent to [UDP://%s:%d] :   %d bytes (%d waiting).\n", m_tuner, m_ipSend, m_portSend, udp_send, tamSend);
+						_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Sent to [UDP://%s:%d] : %5d bytes (waiting:%05d).\n", m_tuner, m_ipSend, m_portSend, udp_send, tamSend);
 						m_Traces->WriteTrace(log_output, LEVEL_TRZ_5);
 					}
 				}
