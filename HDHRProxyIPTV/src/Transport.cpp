@@ -92,8 +92,6 @@ void CTransport::StopThreadTransport()
 	m_socketUDP = -1;
 }
 
-}
-
 CTransport::CTransport()
 {
 	m_errConnectionIni = 0;
