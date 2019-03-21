@@ -228,7 +228,7 @@ int CRingBufferTS_Basic::GetMultipleTSPacket(char* data, int numMaxPackets, unsi
 
 	if (m_Traces->IsLevelWriteable(LEVEL_TRZ_6))
 	{
-		_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Read from Ring Buffer to send: %d bytes. %d packets. More Info Buffer: Read Position[%d]; Write Position[%d]; Free Space[%d]\n",
+		_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Read from Ring Buffer >>> %5d bytes; %02d packets.    More Info Buffer: Read Position[%05d]; Write Position[%05d]; Free Space[%05d]\n",
 			m_tuner, numTSPackets * 188, numTSPackets, m_posRead, m_posWrite, m_freeSpace);
 		m_Traces->WriteTrace(log_output, LEVEL_TRZ_6);
 	}
