@@ -696,7 +696,7 @@ int CTransport::TreatReceivedDataHTTP()
 
 		if (m_Traces->IsLevelWriteable(LEVEL_TRZ_6))
 		{
-			_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Next recv_size=%d bytes               (Read Buffer size: %d).\n", m_tuner, recv_size, readBufferPos);
+			_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Next recv_size:           %5d bytes.                             (Read Buffer size: %05d).\n", m_tuner, recv_size, readBufferPos);
 			m_Traces->WriteTrace(log_output, LEVEL_TRZ_6);
 		}
 
@@ -745,7 +745,7 @@ int CTransport::TreatReceivedDataHTTP()
 
 		if ( recv_size == 0 )  // Timeout of read call
 		{
-			m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Read from Stream Socket timeout!\n", LEVEL_TRZ_6);
+			m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Read from Stream Socket timeout!\n", LEVEL_TRZ_4);
 			receivingDataHTTP = 0;
 			notstream++;
 
@@ -785,7 +785,7 @@ int CTransport::TreatReceivedDataHTTP()
 		}
 		if (m_Traces->IsLevelWriteable(LEVEL_TRZ_5))
 		{
-			_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Received from TCP Socket: %d bytes,   (Read Buffer size: %d).\n", m_tuner, recv_size, readBufferPos + recv_size);
+			_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Received from TCP Socket: %5d bytes.                             (Read Buffer size: %05d).\n", m_tuner, recv_size, readBufferPos + recv_size);
 			m_Traces->WriteTrace(log_output, LEVEL_TRZ_5);
 		}
 
@@ -795,7 +795,7 @@ int CTransport::TreatReceivedDataHTTP()
 		readBufferPos += recv_size;
 		if ( readBufferPos > readBufferSize )
 		{
-			m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] ERROR Read Buffer overflow!\n", LEVEL_TRZ_2);
+			m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] ERROR Read Buffer overflow! (empty half of the buffer).\n", LEVEL_TRZ_2);
 			readBufferPos = (readBufferSize / 2) - 1;
 			memmove(&readBuffer[0], &readBuffer[readBufferPos], readBufferPos);
 			memset(&readBuffer[readBufferPos], 0, readBufferSize - readBufferPos);
@@ -893,15 +893,14 @@ int CTransport::TreatReceivedDataHTTP()
 			
 			if ( notValidTS > 0 )
 			{
-				if      (notValidTS == 1) m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Incoming data: garbage or need to Resynchronize (SYNC LOST) [ waiting data ]\n", LEVEL_TRZ_4);
-				else if (notValidTS == 2) m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Incoming data: garbage or need to Resynchronize (SYNC LOST) [  length<188  ]\n", LEVEL_TRZ_4);
-				else if (notValidTS == 3) m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Incoming data: garbage or need to Resynchronize (SYNC LOST) [ !length%188  ]\n", LEVEL_TRZ_4);
-				else                      m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Incoming data: garbage or need to Resynchronize (SYNC LOST) [fail sync mark]\n", LEVEL_TRZ_3);
+				if      (notValidTS == 1) m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Incoming data: garbage or need to Resynchronize (SYNC LOST) [ waiting data ].\n", LEVEL_TRZ_4);
+				else if (notValidTS == 2) m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Incoming data: garbage or need to Resynchronize (SYNC LOST) [  length<188  ].\n", LEVEL_TRZ_4);
+				else if (notValidTS == 3) m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Incoming data: garbage or need to Resynchronize (SYNC LOST) [ !length%188  ].\n", LEVEL_TRZ_4);
+				else                      m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Incoming data: garbage or need to Resynchronize (SYNC LOST) [fail sync mark].\n", LEVEL_TRZ_3);
 
 				if (m_Traces->IsLevelWriteable(LEVEL_TRZ_4))
 				{
-					//_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: Complete data in buffer to Resynchronize >>> \n%s\n<<< (OF Buffer data)\n", readBuffer);
-					_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] re-SYNC: Starting to search           (Read Buffer size: %d).\n", m_tuner, readBufferPos);
+					_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] re-SYNC: Starting to search >>>                                    (Read Buffer size: %05d).\n", m_tuner, readBufferPos);
 					m_Traces->WriteTrace(log_output, LEVEL_TRZ_4);
 				}
 				notValidTS = 1;
@@ -919,7 +918,7 @@ int CTransport::TreatReceivedDataHTTP()
 							newSyncPos = i;
 							if (m_Traces->IsLevelWriteable(LEVEL_TRZ_4))
 							{
-								_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] re-SYNC: low data, SYNC possible @%d  (Read Buffer size: %d).\n", m_tuner, i, readBufferPos);
+								_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] re-SYNC: Low data, SYNC possible @%05d                            (Read Buffer size: %05d).\n", m_tuner, i, readBufferPos);
 								m_Traces->WriteTrace(log_output, LEVEL_TRZ_4);
 							}
 							break;
@@ -933,7 +932,7 @@ int CTransport::TreatReceivedDataHTTP()
 								newSyncPos = i;
 								if (m_Traces->IsLevelWriteable(LEVEL_TRZ_4))
 								{
-									_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] re-SYNC: Inconming data OK at %d       (Read Buffer size: %d).\n", m_tuner, i, readBufferPos);
+									_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] re-SYNC: Inconming data OK at %5d                                (Read Buffer size: %05d).\n", m_tuner, i, readBufferPos);
 									m_Traces->WriteTrace(log_output, LEVEL_TRZ_4);
 								}
 								break;
@@ -949,7 +948,7 @@ int CTransport::TreatReceivedDataHTTP()
 					// Not found any SYNC mark! Discard all data!
 					if (m_Traces->IsLevelWriteable(LEVEL_TRZ_4))
 					{
-						_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] re-SYNC: Not found SYNC on buffer, erasing %d bytes of data.\n", m_tuner, readBufferPos);
+						_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] re-SYNC: Not found SYNC on buffer, erasing %5d bytes of data.\n", m_tuner, readBufferPos);
 						m_Traces->WriteTrace(log_output, LEVEL_TRZ_4);
 					}
 					readBufferPos = 0;
@@ -962,7 +961,7 @@ int CTransport::TreatReceivedDataHTTP()
 					readBufferPos = readBufferPos - newSyncPos;
 					if (m_Traces->IsLevelWriteable(LEVEL_TRZ_4))
 					{
-						_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] re-SYNC: Removing %d bytes at start    (Read Buffer size: %d).\n", m_tuner, newSyncPos, readBufferPos);
+						_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] re-SYNC: Removing %5d bytes at start                             (Read Buffer size: %05d).\n", m_tuner, newSyncPos, readBufferPos);
 						m_Traces->WriteTrace(log_output, LEVEL_TRZ_4);
 					}
 					memset(&readBuffer[readBufferPos], 0, readBufferSize - readBufferPos);
@@ -988,7 +987,7 @@ int CTransport::TreatReceivedDataHTTP()
 					if ((j == complet) && (notValidTS == 0)) // All OK!
 					{
 						newSyncPos = 0;
-						m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] re-SYNC: Completed!\n", LEVEL_TRZ_4);
+						m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] re-SYNC: >>> Completed ALL OK!\n", LEVEL_TRZ_4);
 
 						if ((incomplet != 0) && (readBuffer[188 * j] == 'G'))
 						{
@@ -1004,7 +1003,7 @@ int CTransport::TreatReceivedDataHTTP()
 						int last_good = 188 * j;
 						if (m_Traces->IsLevelWriteable(LEVEL_TRZ_4))
 						{
-							_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] re-SYNC: Del %d bytes from %d to end  (Read Buffer size: %d).\n", m_tuner, readBufferPos - last_good, last_good, readBufferPos);
+							_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] re-SYNC: Deleting %5d bytes, from %5d to %5d                 (Read Buffer size: %05d).\n", m_tuner, readBufferPos - last_good, last_good, readBufferPos, last_good );
 							m_Traces->WriteTrace(log_output, LEVEL_TRZ_4);
 						}
 						readBufferPos = last_good;
@@ -1092,7 +1091,7 @@ int CTransport::TreatReceivedDataHTTP()
 						// Insert OK
 						if (m_Traces->IsLevelWriteable(LEVEL_TRZ_5))
 						{
-							_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Put in Ring:   %d bytes.              (Read Buffer size: %d).\n", m_tuner, endPos, readBufferPos - endPos);
+							_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Put in Ring Buffer:       %5d bytes.                             (Read Buffer size: %05d).\n", m_tuner, endPos, readBufferPos - endPos);
 							m_Traces->WriteTrace(log_output, LEVEL_TRZ_5);
 						}
 						memmove(&readBuffer[0], &readBuffer[endPos], readBufferPos - endPos);
