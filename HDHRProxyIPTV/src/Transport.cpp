@@ -700,38 +700,72 @@ int CTransport::TreatReceivedDataHTTP()
 			m_Traces->WriteTrace(log_output, LEVEL_TRZ_6);
 		}
 
-		if (!getPerformSend()) return -1;
-		if ((recv_size = recv(m_socketHTTP, &readBuffer[readBufferPos], recv_size, 0)) < 0)  // Blocking read!
+		int ok_read = -1;
+		int r_offset = 0;
+		int r_size = 0;
+		int ret = 0;
+		while (ok_read < 1)
 		{
-			err = WSAGetLastError();
-			if ((err == WSAEINTR) || (err == WSAETIMEDOUT))
+			if (!getPerformSend()) return -1;
+			if ((ret = recv(m_socketHTTP, &readBuffer[readBufferPos + r_size], r_offset > 0 ? 188 - r_offset : recv_size, r_offset > 0 ? MSG_WAITALL : 0)) < 0)  // Blocking read!
 			{
-				// Timeout expire!
-				if (m_Traces->IsLevelWriteable(LEVEL_TRZ_6))
+				err = WSAGetLastError();
+				if ((err == WSAEINTR) || (err == WSAETIMEDOUT))
 				{
-					_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Failed read in Stream Socket: %d,%d. Try to continue.\n", m_tuner, recv_size, err);
-					m_Traces->WriteTrace(log_output, LEVEL_TRZ_6);
+					// Timeout expire!
+					if (m_Traces->IsLevelWriteable(LEVEL_TRZ_6))
+					{
+						_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Failed read in Stream Socket: %d,%d. Try to continue.\n", m_tuner, recv_size, err);
+						m_Traces->WriteTrace(log_output, LEVEL_TRZ_6);
+					}
+					ok_read++;
+					//shutdown(m_socketHTTP, SD_BOTH);
+					//closesocket(m_socketHTTP);
+					//m_socketHTTP = -1;
+					//return -1;
 				}
-				//recv_size = 0;
-				//shutdown(m_socketHTTP, SD_BOTH);
-				//closesocket(m_socketHTTP);
-				//m_socketHTTP = -1;
-				//return -1;
+				else
+				{
+					// Another Error in socket!
+					if (m_Traces->IsLevelWriteable(LEVEL_TRZ_4))
+					{
+						_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Error in Stream Socket: %d:%d. Closing connection.\n", m_tuner, recv_size, err);
+						m_Traces->WriteTrace(log_output, LEVEL_TRZ_4);
+					}
+					shutdown(m_socketHTTP, SD_BOTH);
+					closesocket(m_socketHTTP);
+					m_socketHTTP = -1;
+					return -1;
+				}
+			r_size += ret;
+			int total_r = r_size + readBufferPos;
+
+			if (!isBody || r_size == 0)
+			{
+				ok_read = 1;
+			}
+			else if (total_r % 188 == 0)
+			{
+				ok_read = 1;
 			}
 			else
 			{
-				// Another Error in socket!
+				r_offset = total_r % 188;
 				if (m_Traces->IsLevelWriteable(LEVEL_TRZ_4))
 				{
-					_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Error in Stream Socket: %d:%d. Closing connection.\n", m_tuner, recv_size, err);
+					_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Partial packet read in Socket retry to read for %5d bytes pending.\n", m_tuner, 188 - r_offset);
 					m_Traces->WriteTrace(log_output, LEVEL_TRZ_4);
 				}
-				shutdown(m_socketHTTP, SD_BOTH);
-				closesocket(m_socketHTTP);
-				m_socketHTTP = -1;
-				return -1;
 			}
-
+	        }
+		recv_size = r_size;
+		if (r_size > 0)
+		{
+			if (m_Traces->IsLevelWriteable(LEVEL_TRZ_4))
+			{
+				_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Continue after Partial reading from Socket, new %5d bytes readed (Read Buffer size: %05d).\n", m_tuner, recv_size, readBufferPos + recv_size);
+				m_Traces->WriteTrace(log_output, LEVEL_TRZ_4);
+			}
 		}
 
 		// Update GUI counters
