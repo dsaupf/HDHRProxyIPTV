@@ -69,7 +69,8 @@ public:
 	char readBuffer[188 * 7 * 24];    // Buffer user for reading from socket; it may contain data from a previous read call!
 	int  readBufferSize = sizeof(readBuffer);
 	int  readBufferPos = 0;           // Size of valid data on the buffer.
-	int  readBufferMinPos = 7 * 188;  // Position of lookahead valid data on the buffer.
+	//int  readBufferMinPos = 7 * 188;  // Position of lookahead valid data on the buffer.
+	int  readBufferMinPos = 0;          // lookahead disabled.
 	//int kkp = -1;
 
 	CTransport();
