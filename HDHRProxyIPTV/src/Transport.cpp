@@ -700,6 +700,7 @@ int CTransport::TreatReceivedDataHTTP()
 			m_Traces->WriteTrace(log_output, LEVEL_TRZ_6);
 		}
 
+		if (!getPerformSend()) return -1;
 		if ((recv_size = recv(m_socketHTTP, &readBuffer[readBufferPos], recv_size, 0)) < 0)  // Blocking read!
 		{
 			err = WSAGetLastError();
@@ -753,6 +754,7 @@ int CTransport::TreatReceivedDataHTTP()
 			int ntry = 0;
 			while (ntry<5)
 			{
+				if (!getPerformSend()) return -1;
 				res = sendto(m_socketUDP,
 					nullPaddingPckt,
 					MAX_SIZE_DATAGRAM_TO_SEND,
@@ -1010,6 +1012,7 @@ int CTransport::TreatReceivedDataHTTP()
 						memset(&readBuffer[readBufferPos], 0, readBufferSize - readBufferPos);
 					}
 					// End of checks when resync!
+					notValidTS = 0; // Whatever is in the buffer is now valid.
 				}
 				// End of checks when detected is not valid!
 			}
@@ -1024,6 +1027,7 @@ int CTransport::TreatReceivedDataHTTP()
 				int ntry = 0;
 				while (ntry<5)
 				{
+					if (!getPerformSend()) return -1;
 					res = sendto(m_socketUDP,
 						nullPaddingPckt,
 						MAX_SIZE_DATAGRAM_TO_SEND,
@@ -1121,6 +1125,7 @@ int CTransport::TreatReceivedDataHTTP()
 			//if (strlen(dataR) && tamSend)  // if data to send...
 			if (tamSend)  // if data to send...
 			{
+				int offset = 0;
 				while (tamSend > 1)
 				{
 					// Send in blocks of 1316 or less!
@@ -1135,8 +1140,9 @@ int CTransport::TreatReceivedDataHTTP()
 					int ntry = 0;
 					while (ntry<5)
 					{
+						if (!getPerformSend()) return -1;
 						res = sendto(m_socketUDP,
-							dataR,
+							dataR + offset,
 							udp_send,
 							0, (SOCKADDR *)& RecvAddr, sizeof(RecvAddr));
 						if (res == SOCKET_ERROR)
@@ -1160,6 +1166,7 @@ int CTransport::TreatReceivedDataHTTP()
 						_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Sent to [UDP://%s:%d] : %5d bytes (waiting:%05d).\n", m_tuner, m_ipSend, m_portSend, udp_send, tamSend);
 						m_Traces->WriteTrace(log_output, LEVEL_TRZ_5);
 					}
+					offset += udp_send;
 				}
 			}
 		}
