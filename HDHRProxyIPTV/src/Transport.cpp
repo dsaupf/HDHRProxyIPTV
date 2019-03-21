@@ -769,6 +769,29 @@ int CTransport::TreatReceivedDataHTTP()
 			}
 		}
 
+/*
+		int kk;
+		for (kk=0; (kk * 188) < recv_size ; kk++)
+		{
+			const unsigned char* ppp = (unsigned char*)&readBuffer[readBufferPos + (kk * 188)];
+			if (ppp[1] == '\x00' && ppp[2] == '\xa3')
+			{
+				const int cc = ppp[3] & 15;
+				//if (kkp < 0)
+				//    kkp=cc-1;
+				kkp++;
+				if (kkp > 15) kkp=0;
+				if (kkp != cc)
+				{
+					_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] CC Error! pre=%d curr=%d (kk=%d) recv=%d\n", m_tuner, kkp, cc, kk, recv_size);
+					m_Traces->WriteTrace(log_output, LEVEL_TRZ_3);
+//					m_basicRingBuffer->m_lockaheads++;
+				}
+				kkp = cc;
+			}
+		}
+*/
+
 		// Update GUI counters
 		SYSTEMTIME curr;
 		GetLocalTime(&curr);
