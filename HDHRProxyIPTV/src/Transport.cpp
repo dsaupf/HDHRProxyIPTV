@@ -592,7 +592,6 @@ int CTransport::TreatReceivedDataHTTP()
 	char nullPaddingPckt[MAX_SIZE_DATAGRAM_TO_SEND];
 	char dataR[MAX_SIZE_DATAGRAM_TO_SEND*25];
 	int recv_size = 1316;
-	int size = recv_size;
 	int isBody = 0;
 	int tamSend = 0;
 	int isSync = 0;
@@ -797,8 +796,9 @@ int CTransport::TreatReceivedDataHTTP()
 		if ( readBufferPos > readBufferSize )
 		{
 			m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] ERROR Read Buffer overflow!\n", LEVEL_TRZ_2);
-			readBufferPos = 0;
-			recv_size = 0;
+			readBufferPos = (readBufferSize / 2) - 1;
+			memmove(&readBuffer[0], &readBuffer[readBufferPos], readBufferPos);
+			memset(&readBuffer[readBufferPos], 0, readBufferSize - readBufferPos);
 			
 			continue;
 		}
@@ -862,7 +862,7 @@ int CTransport::TreatReceivedDataHTTP()
 			}
 			else
 			{
-				memcpy(&readBuffer[0], &readBuffer[HTTPHeaderEnd+1], readBufferPos-HTTPHeaderEnd);
+				memmove(&readBuffer[0], &readBuffer[HTTPHeaderEnd+1], readBufferPos-HTTPHeaderEnd);
 				readBufferPos = readBufferPos-HTTPHeaderEnd;
 				isBody = 1;
 				m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Starting to receive the stream.\n", LEVEL_TRZ_6);
@@ -958,7 +958,7 @@ int CTransport::TreatReceivedDataHTTP()
 				else
 				{
 					// Remove ancient data positioning at new SYNC mark!
-					memcpy(&readBuffer[0], &readBuffer[newSyncPos], readBufferPos - newSyncPos);
+					memmove(&readBuffer[0], &readBuffer[newSyncPos], readBufferPos - newSyncPos);
 					readBufferPos = readBufferPos - newSyncPos;
 					if (m_Traces->IsLevelWriteable(LEVEL_TRZ_4))
 					{
@@ -1095,7 +1095,7 @@ int CTransport::TreatReceivedDataHTTP()
 							_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Put in Ring:   %d bytes.              (Read Buffer size: %d).\n", m_tuner, endPos, readBufferPos - endPos);
 							m_Traces->WriteTrace(log_output, LEVEL_TRZ_5);
 						}
-						memcpy(&readBuffer[0], &readBuffer[endPos], readBufferPos - endPos);
+						memmove(&readBuffer[0], &readBuffer[endPos], readBufferPos - endPos);
 						readBufferPos = readBufferPos - endPos;
 					}
 					else
