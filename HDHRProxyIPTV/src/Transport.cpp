@@ -710,12 +710,12 @@ int CTransport::TreatReceivedDataHTTP()
 			if ((ret = recv(m_socketHTTP, &readBuffer[readBufferPos + r_size], r_offset > 0 ? 188 - r_offset : recv_size, r_offset > 0 ? MSG_WAITALL : 0)) < 0)  // Blocking read!
 			{
 				err = WSAGetLastError();
-				if ((err == WSAEINTR) || (err == WSAETIMEDOUT))
+				if (((err == WSAEINTR) || (err == WSAETIMEDOUT)) && (ok_read < 0))
 				{
 					// Timeout expire!
 					if (m_Traces->IsLevelWriteable(LEVEL_TRZ_6))
 					{
-						_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Failed read in Stream Socket: %d,%d. Try to continue.\n", m_tuner, recv_size, err);
+						_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Failed read in Stream Socket: %d,%d. Try to continue.\n", m_tuner, r_size, err);
 						m_Traces->WriteTrace(log_output, LEVEL_TRZ_6);
 					}
 					ok_read++;
@@ -729,7 +729,7 @@ int CTransport::TreatReceivedDataHTTP()
 					// Another Error in socket!
 					if (m_Traces->IsLevelWriteable(LEVEL_TRZ_4))
 					{
-						_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Error in Stream Socket: %d:%d. Closing connection.\n", m_tuner, recv_size, err);
+						_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Error in Stream Socket: %d:%d. Closing connection.\n", m_tuner, r_size, err);
 						m_Traces->WriteTrace(log_output, LEVEL_TRZ_4);
 					}
 					shutdown(m_socketHTTP, SD_BOTH);
@@ -737,6 +737,7 @@ int CTransport::TreatReceivedDataHTTP()
 					m_socketHTTP = -1;
 					return -1;
 				}
+			}
 			r_size += ret;
 			int total_r = r_size + readBufferPos;
 
