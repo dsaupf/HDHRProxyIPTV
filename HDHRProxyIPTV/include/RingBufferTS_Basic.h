@@ -88,7 +88,7 @@ public:
 	int Insert(char* data, int size);
 	int GetTSPacket(char* data);  // Return next valid 188 bytes packet
 	int GetData(char* data, int size); // Return "size" bytes of buffer
-	int GetMultipleTSPacket(char* data, int numMaxPackets); // Return 1-numMaxPackets valid 188 bytes packets
+	int GetMultipleTSPacket(char* data, int numMaxPackets, unsigned int numPadding[1]); // Return 1-numMaxPackets valid 188 bytes packets
 	void GenerateNullPaddingTSPackets(char* data, int numPackets);
 	int PIDFiltering(char* data);
 	void InitHTTPMessage();
