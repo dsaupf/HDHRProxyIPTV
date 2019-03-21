@@ -778,6 +778,7 @@ int CTransport::TreatReceivedDataHTTP()
 				m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Closing Stream Socket because several timeouts.\n", LEVEL_TRZ_3);
 				shutdown(m_socketHTTP, SD_BOTH);
 				closesocket(m_socketHTTP);
+				m_socketHTTP = -1;
 				return -1;
 			}
 
