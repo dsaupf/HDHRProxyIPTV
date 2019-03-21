@@ -70,6 +70,7 @@ public:
 	int  readBufferSize = sizeof(readBuffer);
 	int  readBufferPos = 0;           // Size of valid data on the buffer.
 	int  readBufferMinPos = 7 * 188;  // Position of lookahead valid data on the buffer.
+	//int kkp = -1;
 
 	CTransport();
 	~CTransport();
