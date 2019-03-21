@@ -1178,7 +1178,8 @@ int CTransport::TreatReceivedDataHTTP()
 			//tamSend = m_basicRingBuffer->GetMultipleTSPacket(dataR, 7*2);  // Write at double speed (*2)
 			int packets_to_read;
 			packets_to_read = 7 * 24;  // Write at max speed! (dataR size 7*25)
-			tamSend = m_basicRingBuffer->GetMultipleTSPacket(dataR, packets_to_read);
+			unsigned int numPadding[1] = { 0 };
+			tamSend = m_basicRingBuffer->GetMultipleTSPacket(dataR, packets_to_read, numPadding);
 
 			//if (strlen(dataR) && tamSend)  // if data to send...
 			if (tamSend)  // if data to send...
@@ -1206,7 +1207,7 @@ int CTransport::TreatReceivedDataHTTP()
 						if (res == SOCKET_ERROR)
 						{
 							m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Write socket re-try.\n", LEVEL_TRZ_3);
-							Sleep(50);
+							Sleep(25);
 							ntry++;
 						}
 						else break;
@@ -1225,6 +1226,14 @@ int CTransport::TreatReceivedDataHTTP()
 						m_Traces->WriteTrace(log_output, LEVEL_TRZ_5);
 					}
 					offset += udp_send;
+
+					if (numPadding[0] > 0)
+					{
+						// Slow down a bit!
+						Sleep(15);
+						m_basicRingBuffer->m_lockaheads++;
+						m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Slow down a bit.\n", LEVEL_TRZ_4);
+					}
 				}
 			}
 		}
