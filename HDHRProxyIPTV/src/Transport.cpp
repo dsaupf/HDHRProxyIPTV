@@ -624,7 +624,7 @@ int CTransport::TreatReceivedDataHTTP()
 		{
 			shutdown(m_socketHTTP, SD_BOTH);
 			closesocket(m_socketHTTP);
-			m_socketUDP = -1;
+			m_socketHTTP = -1;
 			return -1;
 		}
 		return 0;
