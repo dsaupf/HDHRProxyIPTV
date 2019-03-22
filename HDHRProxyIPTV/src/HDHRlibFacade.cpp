@@ -1295,9 +1295,11 @@ int HDHRlibFacade::CreateMessageResponseHDHR(InfoMessageHDHR* infoReqMsg, struct
 		_snprintf(name, 500 - 2, TUNERX_FILTER, infoReqMsg->numTuner);
 		name_len = (int)strlen(name) + 1;
 		// TODO: Use a function to convert to the right format: Ex. "0x0000 0x0010-0x0012"
-		strncpy(value, CStringA(infTuner[infoReqMsg->numTuner].getPidsToFiltering()), 1024 - 2);
-		if (!strcmp(value, ""))
-			strncpy(value, "0x0000-0x1fff", 1024);
+		//strncpy(value, CStringA(infTuner[infoReqMsg->numTuner].getPidsToFiltering()), 1024 - 2);
+		//if (!strcmp(value, ""))
+		//	strncpy(value, "0x0000-0x1fff", 1024);
+		strncpy(value, infTuner[infoReqMsg->numTuner].getFilter(), 1024 - 2);
+		value[1023] = 0;
 		value_len = (int)strlen(value) + 1;
 
 		hdhomerun_pkt_write_u8(*msg, HDHOMERUN_TAG_GETSET_NAME);
