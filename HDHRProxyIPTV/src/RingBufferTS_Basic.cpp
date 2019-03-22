@@ -540,7 +540,7 @@ int CRingBufferTS_Basic::CheckTimeToAnalyzeData()
 			_snprintf(trace, sizeof(trace) - 2, "TRANSPORT  :: [Tuner %d] ALL DATA  : Packets: sent data %05d, send padding %4d, total received %05d, total lookaheads %3d\n", m_tuner, m_filteredPacketsSent, m_nullPacketsSent, m_receivedPackets, m_lockaheads);
 		}
 		else
-			_snprintf(trace, sizeof(trace) - 2, "TRANSPORT  :: [Tuner %d] FILTERING : Packets: sent data %05d, send padding %4d, filtered out %05d, total received %05d, total sended %d, total lookaheads %3d\n", m_tuner, m_filteredPacketsSent, m_nullPacketsSent, /*m_filteredOutPacketsDescarted*/m_receivedPackets - m_filteredPacketsSent, m_receivedPackets, m_filteredPacketsSent + m_nullPacketsSent, m_lockaheads);
+			_snprintf(trace, sizeof(trace) - 2, "TRANSPORT  :: [Tuner %d] FILTERING : Packets: sent data %05d, send padding %4d, filtered out %05d, total received %05d, total sended %d, total lookaheads %3d\n", m_tuner, m_filteredPacketsSent, m_nullPacketsSent, m_filteredOutPacketsDescarted /*m_receivedPackets - m_filteredPacketsSent*/, m_receivedPackets, m_filteredPacketsSent + m_nullPacketsSent, m_lockaheads);
 		
 		m_Traces->WriteTrace(trace, LEVEL_TRZ_3);
 
