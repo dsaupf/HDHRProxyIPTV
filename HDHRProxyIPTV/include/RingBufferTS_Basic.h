@@ -52,7 +52,7 @@ class CRingBufferTS_Basic
 public:
 	CConfigProxy* m_cfgProxy;
 
-	char m_buffer[78960];	//60*1316
+	char m_buffer[157920];	//120*1316
 	char m_buffer_output[MAX_SIZE_DATAGRAM_TO_SEND];
 	int m_numTSPacketsOutput;
 	int m_posWrite;
