@@ -186,7 +186,7 @@ int CRingBufferTS_Basic::GetMultipleTSPacket(char* data, int numMaxPackets, unsi
 	else
 	{
 		// For internal pid filtering check if time to send packets
-		if ((GetBusySpaceBuf() < MAX_SIZE_DATAGRAM_TO_SEND * 50) && (!CheckTimeToSend()))
+		if ((GetBusySpaceBuf() < MAX_SIZE_DATAGRAM_TO_SEND * CHUNK_SIZE) && (!CheckTimeToSend()))
 			return 0;
 	}
 
@@ -223,7 +223,7 @@ int CRingBufferTS_Basic::GetMultipleTSPacket(char* data, int numMaxPackets, unsi
 		}
 	}
 
-	if ((!pass_all_pids) && (numTSPackets < NUM_PACKETS_TO_SEND))
+	if ((!pass_all_pids) && (numTSPackets <= NUM_PACKETS_TO_SEND))
 		SaveTimeToSend();
 
 	if (m_Traces->IsLevelWriteable(LEVEL_TRZ_6))
@@ -433,7 +433,7 @@ int CRingBufferTS_Basic::CheckTimeToSend()
 		m_Traces->WriteTrace(log_output, LEVEL_TRZ_6);
 	}
 
-	if (nanoSecs >= m_cfgProxy->getMaxTimeToSendDgram())
+	if (nanoSecs * CHUNK_SIZE >= m_cfgProxy->getMaxTimeToSendDgram())   // Triggering the timeout at Timeout/CHUNK_SIZE speed!
 		return 1;
 	
 	return 0;
