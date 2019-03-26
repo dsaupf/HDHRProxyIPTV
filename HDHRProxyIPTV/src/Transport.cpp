@@ -1177,7 +1177,7 @@ int CTransport::TreatReceivedDataHTTP()
 
 			//tamSend = m_basicRingBuffer->GetMultipleTSPacket(dataR, 7*2);  // Write at double speed (*2)
 			int packets_to_read;
-			packets_to_read = 7 * 24;  // Write at max speed! (dataR size 7*25)
+			packets_to_read = 7 * CHUNK_SIZE;  // Process only a chunk of packets in each loop! (dataR size 7*25)
 			unsigned int numPadding[1] = { 0 };
 			tamSend = m_basicRingBuffer->GetMultipleTSPacket(dataR, packets_to_read, numPadding);
 
