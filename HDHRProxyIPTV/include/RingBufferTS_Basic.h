@@ -41,7 +41,7 @@
 #define NUM_PACKETS_TO_SEND 7           //Packets of transport stream to send by UDP to the client
 #define PID_MAX	8191
 #define RING_SIZE 157920                //120*1316
-#define CHUNK_SIZE 12                   //Number of (7*188) packets to process
+#define CHUNK_SIZE 24                   //Number of (7*188) packets to process
 
 union timeunion {
 	FILETIME fileTime;
