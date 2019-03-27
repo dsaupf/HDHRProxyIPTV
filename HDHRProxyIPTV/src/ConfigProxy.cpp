@@ -81,9 +81,10 @@ void CConfigProxy::ReadFileINI()
 	if (m_Lock != 0 && m_Lock != 1)
 		m_Lock = 0;
 
-	CString t = AfxGetApp()->GetProfileString(section, L"MAX_TIME_SEND_DGRAM", _T(MAX_TIME_TO_SEND_S));
-	t.Replace(L"\"", L"");
-	m_maxTimeToSendDgram = atoll(CStringA(t));
+	//CString t = AfxGetApp()->GetProfileString(section, L"MAX_TIME_SEND_DGRAM", _T(MAX_TIME_TO_SEND_S));
+	//t.Replace(L"\"", L"");
+	//m_maxTimeToSendDgram = atoll(CStringA(t));
+	m_maxTimeToSendDgram = MAX_TIME_TO_SEND;
 	m_maxTimeToPacket = m_maxTimeToSendDgram / 7;
 
 	m_FullTSReplace = AfxGetApp()->GetProfileString(section, L"FULL_TS_REPLACE");
@@ -186,10 +187,10 @@ int CConfigProxy::SaveItems()
 	if (!AfxGetApp()->WriteProfileInt(seccion, _T("LOCK"), m_Lock))
 		return 0;
 
-	CString t;
-	t.Format(L"%I64d", m_maxTimeToSendDgram);
-	if (!AfxGetApp()->WriteProfileString(seccion, _T("MAX_TIME_SEND_DGRAM"), t))
-		return 0;
+	//CString t;
+	//t.Format(L"%I64d", m_maxTimeToSendDgram);
+	//if (!AfxGetApp()->WriteProfileString(seccion, _T("MAX_TIME_SEND_DGRAM"), t))
+	//	return 0;
 
 	// EMU_DEBUG Section
 	seccion = L"EMU_DEBUG";
