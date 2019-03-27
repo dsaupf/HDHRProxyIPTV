@@ -186,7 +186,7 @@ int CRingBufferTS_Basic::GetMultipleTSPacket(char* data, int numMaxPackets, unsi
 	else
 	{
 		// For internal pid filtering check if time to send packets
-		if ((GetBusySpaceBuf() < MAX_SIZE_DATAGRAM_TO_SEND * CHUNK_SIZE * 6) && (!CheckTimeToSend()))
+		if ((GetBusySpaceBuf() < MAX_SIZE_DATAGRAM_TO_SEND * CHUNK_SIZE * 5) && (!CheckTimeToSend()))
 			return 0;
 	}
 
