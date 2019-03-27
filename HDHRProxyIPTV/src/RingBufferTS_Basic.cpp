@@ -223,7 +223,7 @@ int CRingBufferTS_Basic::GetMultipleTSPacket(char* data, int numMaxPackets, unsi
 		}
 	}
 
-	if ((!pass_all_pids) && (numTSPackets <= NUM_PACKETS_TO_SEND))
+	if ((!pass_all_pids) && (GetBusySpaceBuf() < 1))
 		SaveTimeToSend();
 
 	if (m_Traces->IsLevelWriteable(LEVEL_TRZ_6))
