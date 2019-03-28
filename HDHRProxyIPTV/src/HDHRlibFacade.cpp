@@ -55,7 +55,6 @@ int HDHRlibFacade::CreateSocketServUDP_Discovery(CTrace *traceLog)
 	/* Creation of the socket. */
 	m_sockDiscovery = hdhomerun_sock_create_udp();
 	if (m_sockDiscovery == HDHOMERUN_SOCK_INVALID) {
-		//if (traceLog) traceLog->WriteTrace("DISCOVERY  :: Error in creating the Socket server to HDHR\n", ERR);
 		LOGD(traceLog,ERR,0,"Error in creating the Socket server to HDHR\n");
 		return 0;
 	}
@@ -63,13 +62,11 @@ int HDHRlibFacade::CreateSocketServUDP_Discovery(CTrace *traceLog)
 	/* Bind socket. A local address is associated to the socket */
 	if (!hdhomerun_sock_bind(m_sockDiscovery, m_IPHDHR, HDHOMERUN_DISCOVER_UDP_PORT)) {
 		hdhomerun_sock_destroy(m_sockDiscovery);
-		//if (traceLog) traceLog->WriteTrace("DISCOVERY  :: Could not associate (bind) direction to Discovery UDP socket for HDHR\n", ERR);
 		LOGD(traceLog,ERR,0,"Could not associate (bind) direction to Discovery UDP socket for HDHR\n");
 
 		return 0;
 	}
 
-	//if (traceLog) traceLog->WriteTrace("DISCOVERY  :: Created Socket UDP Server for HDHR \n", LEVEL_TRZ_2);
 	LOGD(traceLog,TRZ2,0,"Created Socket UDP Server for HDHR \n");
 
 	return 1;
@@ -306,8 +303,6 @@ int HDHRlibFacade::ObtainTypeMessage(struct hdhomerun_pkt_t *rx_pkt, CTrace *trz
 	char auxString[1024];
 	memset(auxString, 0, 1024);
 	uint8_t *next = NULL;
-	//char log_output[4096];
-	//memset(log_output, 0, 4096);
 	(*infoMsg)->setMsg = 0;
 	strcpy((*infoMsg)->setValue, "");
 	strcpy((char*)(*infoMsg)->RequestMsg, "");
@@ -543,7 +538,6 @@ int HDHRlibFacade::ObtainTypeMessage(struct hdhomerun_pkt_t *rx_pkt, CTrace *trz
 						{
 							//strcpy((*infoMsg)->setValue, (char *)"0x0000-0x1FFF\0");
 							strcpy((*infoMsg)->setValue, (char *)"bypass\0");
-							//if (trz) trz->WriteTrace("CONTROL    :: UNKNOWN [set filter] in HDHRlibFacade::ObtainTypeMessage() (bypass) \n", LEVEL_TRZ_3);
 							LOGC(trz,TRZ3,0,"UNKNOWN [set filter] in HDHRlibFacade::ObtainTypeMessage() (bypass) \n");
 						}
 						else
@@ -556,7 +550,6 @@ int HDHRlibFacade::ObtainTypeMessage(struct hdhomerun_pkt_t *rx_pkt, CTrace *trz
 							{
 								//strcpy((*infoMsg)->setValue, (char *)"0x0000-0x1FFF\0");
 								strcpy((*infoMsg)->setValue, (char *)"bypass\0");
-								//if (trz) trz->WriteTrace("CONTROL    :: FORMAT ERR [set filter] in HDHRlibFacade::ObtainTypeMessage() (bypass) \n", LEVEL_TRZ_3);
 								LOGC(trz,TRZ3,0,"FORMAT ERR [set filter] in HDHRlibFacade::ObtainTypeMessage() (bypass) \n");
 							}
 						}
@@ -690,25 +683,13 @@ int HDHRlibFacade::ObtainTypeMessage(struct hdhomerun_pkt_t *rx_pkt, CTrace *trz
 
 			(*infoMsg)->upgradeMsg = 1;
 
-			//if (trz->IsLevelWriteable(LEVEL_TRZ_4))
-			//{
-			//	_snprintf(log_output, sizeof(log_output) - 2, "CONTROL    :: -->    Received HDHR message [%s:%d] {%06d} : Firmware Upgrade [Message sequence %u]\n", m_sRemoteIPControl, m_remotePortControl, (*infoMsg)->numMsg, (*infoMsg)->seqUpgrade);
-			//	trz->WriteTrace(log_output, LEVEL_TRZ_4);
-			//}
 			LOGC(trz,TRZ4,1,"-->    Received HDHR message [%s:%d] {%06d} : Firmware Upgrade [Message sequence %u]\n", m_sRemoteIPControl, m_remotePortControl, (*infoMsg)->numMsg, (*infoMsg)->seqUpgrade);
-			//trz->WriteTrace("CONTROL    :: Received first message of FIRMWARE UPGRADE\n", LEVEL_TRZ_2);
 			LOGC(trz,TRZ2,0,"Received first message of FIRMWARE UPGRADE\n");
 		}
 		else
 		{
 			(*infoMsg)->upgradeMsg = 0;
-			//if (trz->IsLevelWriteable(LEVEL_TRZ_4))
-			//{
-			//	_snprintf(log_output, sizeof(log_output) - 2, "CONTROL    :: -->    Received HDHR message [%s:%d] {%06d} : Firmware Upgrade [Last Message; Upgrade finished; Message sequence %u (0xFFFFFFFF)]\n", m_sRemoteIPControl, m_remotePortControl, (*infoMsg)->numMsg, (*infoMsg)->seqUpgrade);
-			//	trz->WriteTrace(log_output, LEVEL_TRZ_4);
-			//}
 			LOGC(trz,TRZ4,1,"-->    Received HDHR message [%s:%d] {%06d} : Firmware Upgrade [Last Message; Upgrade finished; Message sequence %u (0xFFFFFFFF)]\n", m_sRemoteIPControl, m_remotePortControl, (*infoMsg)->numMsg, (*infoMsg)->seqUpgrade);
-			//trz->WriteTrace("CONTROL    :: Received last message of FIRMWARE UPGRADE\n", LEVEL_TRZ_2);
 			LOGC(trz,TRZ2,0,"Received last message of FIRMWARE UPGRADE\n");
 		}
 
@@ -724,11 +705,6 @@ int HDHRlibFacade::ObtainTypeMessage(struct hdhomerun_pkt_t *rx_pkt, CTrace *trz
 			next = hdhomerun_pkt_read_tlv(rx_pkt, &tag, &len);
 			data = rx_pkt->pos;
 
-			//if (trz->IsLevelWriteable(LEVEL_TRZ_5))
-			//{
-			//	_snprintf(log_output, sizeof(log_output) - 2, "CONTROL    :: -->    Received HDHR message [%s:%d] {%06d} : UPGRADING Firmware  [Message sequence %u]\n", m_sRemoteIPControl, m_remotePortControl, (*infoMsg)->numMsg, (*infoMsg)->seqUpgrade);
-			//	trz->WriteTrace(log_output, LEVEL_TRZ_5);
-			//}
 			LOGC(trz,TRZ5,1,"-->    Received HDHR message [%s:%d] {%06d} : UPGRADING Firmware  [Message sequence %u]\n", m_sRemoteIPControl, m_remotePortControl, (*infoMsg)->numMsg, (*infoMsg)->seqUpgrade);
 			tipo_msg = HDHR_UPGRADE_FILE_MSG;
 		}
@@ -738,9 +714,6 @@ int HDHRlibFacade::ObtainTypeMessage(struct hdhomerun_pkt_t *rx_pkt, CTrace *trz
 	if (trz && trz->getTraceLevel() != NO_TRACE && tipo_msg != HDHR_UPGRADE_MSG && tipo_msg != HDHR_UPGRADE_FILE_MSG && (*infoMsg)->upgradeMsg != 1)
 	{
 		char tip[4];
-		//int trace_length = 200 + strlen((*infoMsg)->setValue) + strlen((*infoMsg)->RequestMsg);
-		//char *trace = new char[trace_length];
-		//memset(trace, 0, trace_length);
 
 		//strcpy(m_sRemoteIPControl, TreatIP(m_sRemoteIPControl));
 		TreatIP(m_sRemoteIPControl, m_sRemoteIPControl);
@@ -759,76 +732,40 @@ int HDHRlibFacade::ObtainTypeMessage(struct hdhomerun_pkt_t *rx_pkt, CTrace *trz
 
 		if (tipo_msg == ERROR_MSG)
 		{
-			//if (trz->IsLevelWriteable(LEVEL_TRZ_2))
-			//{
-			//	_snprintf(trace, trace_length - 2, "CONTROL    :: UNKNOWN HDHR MESSAGE         [%s:%d] : %s\n", m_sRemoteIPControl, m_remotePortControl, (*infoMsg)->RequestMsg);
-			//	trz->WriteTrace(trace, LEVEL_TRZ_2);
-			//}
 			LOGC(trz,TRZ2,1,"UNKNOWN HDHR MESSAGE         [%s:%d] : %s\n", m_sRemoteIPControl, m_remotePortControl, (*infoMsg)->RequestMsg);
-			//if (trz->IsLevelWriteable(LEVEL_TRZ_4))
-			//{
-			//	_snprintf(trace, trace_length - 2, "CONTROL    :: -->    RECEIVED UNKNOWN HDHR MESSAGE [%s:%d] {%06d} : %s\n", m_sRemoteIPControl, m_remotePortControl, (*infoMsg)->numMsg, (*infoMsg)->RequestMsg);
-			//	trz->WriteTrace(trace, LEVEL_TRZ_4);
-			//}
 			LOGC(trz,TRZ4,1,"-->    RECEIVED UNKNOWN HDHR MESSAGE [%s:%d] {%06d} : %s\n", m_sRemoteIPControl, m_remotePortControl, (*infoMsg)->numMsg, (*infoMsg)->RequestMsg);
 		}
 		else
 		{
 			if (type == HDHOMERUN_TYPE_GETSET_REQ)
-				{
-					if ((*infoMsg)->setMsg)
-					{
-						strcpy(tip, "set");
+            {
+                if ((*infoMsg)->setMsg)
+                {
+                    strcpy(tip, "set");
 
-						//if (trz->IsLevelWriteable(LEVEL_TRZ_4))
-						//{
-						//	_snprintf(trace, trace_length - 2, "CONTROL    :: -->    Received HDHR message [%s:%d] {%06d} : %s %s\n", m_sRemoteIPControl, m_remotePortControl, (*infoMsg)->numMsg, tip, (*infoMsg)->RequestMsg);
-						//	trz->WriteTrace(trace, LEVEL_TRZ_4);
-						//}
-						LOGC(trz,TRZ4,1,"-->    Received HDHR message [%s:%d] {%06d} : %s %s\n", m_sRemoteIPControl, m_remotePortControl, (*infoMsg)->numMsg, tip, (*infoMsg)->RequestMsg);
-						if (toHex)
-						{
-							//if (trz->IsLevelWriteable(LEVEL_TRZ_2))
-							//{
-							//	_snprintf(trace, trace_length - 2, "CONTROL    :: Content of filter message is not printable. It has been converted to Hexadecimal (%s)\n", (*infoMsg)->setValue);
-							//	trz->WriteTrace(trace, LEVEL_TRZ_2);
-							//}
-							LOGC(trz,TRZ2,1,"Content of filter message is not printable. It has been converted to Hexadecimal (%s)\n", (*infoMsg)->setValue);
-						}
+                    LOGC(trz,TRZ4,1,"-->    Received HDHR message [%s:%d] {%06d} : %s %s\n", m_sRemoteIPControl, m_remotePortControl, (*infoMsg)->numMsg, tip, (*infoMsg)->RequestMsg);
+                    if (toHex)
+                    {
+                        LOGC(trz,TRZ2,1,"Content of filter message is not printable. It has been converted to Hexadecimal (%s)\n", (*infoMsg)->setValue);
+                    }
 
-						//For the messages with a response in more than 1 lines the content begins at new line
-						//if (trz->IsLevelWriteable(LEVEL_TRZ_6))
-						//{
-						//	if (tipo_msg == FEATURES_MSG || tipo_msg == TUNERX_STREAMINFO_MSG)
-						//		_snprintf(trace, trace_length - 2, "CONTROL    ::     \\- CONTENT HDHR message  [%s:%d] {%06d} :\n[%s]\n", m_sRemoteIPControl, m_remotePortControl, (*infoMsg)->numMsg, (*infoMsg)->setValue);
-						//	else
-						//		_snprintf(trace, trace_length - 2, "CONTROL    ::     \\- CONTENT HDHR message  [%s:%d] {%06d} : [%s]\n", m_sRemoteIPControl, m_remotePortControl, (*infoMsg)->numMsg, (*infoMsg)->setValue);
-						//	trz->WriteTrace(trace, LEVEL_TRZ_6);
-						//}
-						if (tipo_msg == FEATURES_MSG || tipo_msg == TUNERX_STREAMINFO_MSG)
-						{
-							LOGC(trz,TRZ6,1,"    \\- CONTENT HDHR message  [%s:%d] {%06d} :\n[%s]\n", m_sRemoteIPControl, m_remotePortControl, (*infoMsg)->numMsg, (*infoMsg)->setValue);
-						}
-						else
-						{
-							LOGC(trz,TRZ6,1,"    \\- CONTENT HDHR message  [%s:%d] {%06d} : [%s]\n", m_sRemoteIPControl, m_remotePortControl, (*infoMsg)->numMsg, (*infoMsg)->setValue);
-						}
-					}
-					else
-					{
-						strcpy(tip, "get");
-						//if (trz->IsLevelWriteable(LEVEL_TRZ_4))
-						//{
-						//	_snprintf(trace, trace_length - 2, "CONTROL    :: -->    Received HDHR message [%s:%d] {%06d} : %s %s\n", m_sRemoteIPControl, m_remotePortControl, (*infoMsg)->numMsg, tip, (*infoMsg)->RequestMsg);
-						//	trz->WriteTrace(trace, LEVEL_TRZ_4);
-						//}
-						LOGC(trz,TRZ4,1,"-->    Received HDHR message [%s:%d] {%06d} : %s %s\n", m_sRemoteIPControl, m_remotePortControl, (*infoMsg)->numMsg, tip, (*infoMsg)->RequestMsg);
-					}
-				}
+                    //For the messages with a response in more than 1 lines the content begins at new line
+                    if (tipo_msg == FEATURES_MSG || tipo_msg == TUNERX_STREAMINFO_MSG)
+                    {
+                        LOGC(trz,TRZ6,1,"    \\- CONTENT HDHR message  [%s:%d] {%06d} :\n[%s]\n", m_sRemoteIPControl, m_remotePortControl, (*infoMsg)->numMsg, (*infoMsg)->setValue);
+                    }
+                    else
+                    {
+                        LOGC(trz,TRZ6,1,"    \\- CONTENT HDHR message  [%s:%d] {%06d} : [%s]\n", m_sRemoteIPControl, m_remotePortControl, (*infoMsg)->numMsg, (*infoMsg)->setValue);
+                    }
+                }
+                else
+                {
+                    strcpy(tip, "get");
+                    LOGC(trz,TRZ4,1,"-->    Received HDHR message [%s:%d] {%06d} : %s %s\n", m_sRemoteIPControl, m_remotePortControl, (*infoMsg)->numMsg, tip, (*infoMsg)->RequestMsg);
+                }
+            }
 		}
-
-		//if (trace)
-		//	delete []trace;
 	}
 
 	if (value)
@@ -865,9 +802,6 @@ int HDHRlibFacade::SendResponseControl(InfoMessageHDHR* infoMsg, CTuner* infTune
 			char* tipmsg = new char[strlen((char *)msg->pos)+1];
 			strcpy(tipmsg, (char *)msg->pos);
 
-			//char log_output[4096];
-			//memset(log_output, 0, 4096);
-			
 			if (infoMsg->tipoMsg != HDHR_UPGRADE_MSG && infoMsg->tipoMsg != HDHR_UPGRADE_FILE_MSG)
 			{
 				if (infoMsg->tipoMsg != ERROR_MSG)
@@ -884,23 +818,10 @@ int HDHRlibFacade::SendResponseControl(InfoMessageHDHR* infoMsg, CTuner* infTune
 			}
 			if (infoMsg->tipoMsg == ERROR_MSG)
 			{
-				//if (trz->IsLevelWriteable(LEVEL_TRZ_4))
-				//{
-				//	_snprintf(log_output, sizeof(log_output) - 2, "CONTROL    ::    <-- SEND UNKNOWN HDHR MESSAGE     [%s:%d] {%06ld} : %s\n", m_sRemoteIPControl, m_remotePortControl, infoMsg->numMsg, tipmsg);
-				//	trz->WriteTrace(log_output, LEVEL_TRZ_4);
-				//}
 				LOGC(trz,TRZ4,1,"   <-- SEND UNKNOWN HDHR MESSAGE     [%s:%d] {%06ld} : %s\n", m_sRemoteIPControl, m_remotePortControl, infoMsg->numMsg, tipmsg);
 			}
 			else if (infoMsg->tipoMsg == HDHR_UPGRADE_MSG)
 			{
-				//if (trz->IsLevelWriteable(LEVEL_TRZ_4))
-				//{
-				//	if (infoMsg->seqUpgrade == 4294967295)
-				//		_snprintf(log_output, sizeof(log_output) - 2, "CONTROL    ::    <-- Send HDHR message     [%s:%d] {%06ld} : Response. Firmware Upgrade finished\n", m_sRemoteIPControl, m_remotePortControl, infoMsg->numMsg);
-				//	else
-				//		_snprintf(log_output, sizeof(log_output) - 2, "CONTROL    ::    <-- Send HDHR message     [%s:%d] {%06ld} : Response. Firmware Upgrade initiated\n", m_sRemoteIPControl, m_remotePortControl, infoMsg->numMsg);
-				//	trz->WriteTrace(log_output, LEVEL_TRZ_4);
-				//}
 				if (infoMsg->seqUpgrade == 4294967295)
 				{
 					LOGC(trz,TRZ4,1,"   <-- Send HDHR message     [%s:%d] {%06ld} : Response. Firmware Upgrade finished\n", m_sRemoteIPControl, m_remotePortControl, infoMsg->numMsg);
@@ -912,20 +833,10 @@ int HDHRlibFacade::SendResponseControl(InfoMessageHDHR* infoMsg, CTuner* infTune
 			}
 			else if (infoMsg->tipoMsg == HDHR_UPGRADE_FILE_MSG)
 			{
-				//if (trz->IsLevelWriteable(LEVEL_TRZ_4))
-				//{
-				//	_snprintf(log_output, sizeof(log_output) - 2, "CONTROL    ::    <-- Send HDHR message     [%s:%d] {%06ld} : Response. Firmware Upgrade File.\n", m_sRemoteIPControl, m_remotePortControl, infoMsg->numMsg);
-				//	trz->WriteTrace(log_output, LEVEL_TRZ_4);
-				//}
 				LOGC(trz,TRZ4,1,"   <-- Send HDHR message     [%s:%d] {%06ld} : Response. Firmware Upgrade File.\n", m_sRemoteIPControl, m_remotePortControl, infoMsg->numMsg);
 			}
 			else
 			{
-				//if (trz->IsLevelWriteable(LEVEL_TRZ_4))
-				//{
-				//	_snprintf(log_output, sizeof(log_output) - 2, "CONTROL    ::    <-- Send HDHR message     [%s:%d] {%06ld} : %s\n", m_sRemoteIPControl, m_remotePortControl, infoMsg->numMsg, tipmsg);
-				//	trz->WriteTrace(log_output, LEVEL_TRZ_4);
-				//}
 				LOGC(trz,TRZ4,1,"   <-- Send HDHR message     [%s:%d] {%06ld} : %s\n", m_sRemoteIPControl, m_remotePortControl, infoMsg->numMsg, tipmsg);
 			}
 
@@ -942,20 +853,6 @@ int HDHRlibFacade::SendResponseControl(InfoMessageHDHR* infoMsg, CTuner* infTune
 					msg->pos[2] = '.';
 			}
 	
-			//if (trz->IsLevelWriteable(LEVEL_TRZ_6))
-			//{
-				//if (infoMsg->tipoMsg == ERROR_MSG)
-				//	_snprintf(log_output, sizeof(log_output) - 2, "CONTROL    ::     \\- CONTENT HDHR MESSAGE          [%s:%d] {%06ld} : [%s]\n", m_sRemoteIPControl, m_remotePortControl, infoMsg->numMsg, (char *)msg->pos);
-				//else if (infoMsg->tipoMsg != HDHR_UPGRADE_MSG && infoMsg->tipoMsg != HDHR_UPGRADE_FILE_MSG)
-				//{
-				//	if (infoMsg->tipoMsg == FEATURES_MSG || infoMsg->tipoMsg == TUNERX_STREAMINFO_MSG)
-				//		_snprintf(log_output, sizeof(log_output) - 2, "CONTROL    ::     \\- CONTENT HDHR message  [%s:%d] {%06ld} :\n[%s]\n", m_sRemoteIPControl, m_remotePortControl, infoMsg->numMsg, (char *)msg->pos);
-				//	else
-				//		_snprintf(log_output, sizeof(log_output) - 2, "CONTROL    ::     \\- CONTENT HDHR message  [%s:%d] {%06ld} : [%s]\n", m_sRemoteIPControl, m_remotePortControl, infoMsg->numMsg, (char *)msg->pos);
-				//}
-				//if (infoMsg->tipoMsg != HDHR_UPGRADE_MSG && infoMsg->tipoMsg != HDHR_UPGRADE_FILE_MSG)
-				//	trz->WriteTrace(log_output, LEVEL_TRZ_6);
-			//}
 			if (infoMsg->tipoMsg == ERROR_MSG)
 			{
 				LOGC(trz,TRZ6,1,"    \\- CONTENT HDHR MESSAGE          [%s:%d] {%06ld} : [%s]\n", m_sRemoteIPControl, m_remotePortControl, infoMsg->numMsg, (char *)msg->pos);
@@ -1005,7 +902,6 @@ int HDHRlibFacade::CreateMessageResponseHDHR(InfoMessageHDHR* infoReqMsg, struct
 		len = strlen(infoReqMsg->unknownMsg)+1;
 		if (len > 100)
 		{
-			//if (trz) trz->WriteTrace("CONTROL    :: realloc in HDHRlibFacade::CreateMessageResponseHDHR()\n", LEVEL_TRZ_1);
 			LOGC(trz,TRZ1,0,"realloc in HDHRlibFacade::CreateMessageResponseHDHR()\n");
 			name = (char*)realloc(name, (len+1) * sizeof(char *));
 		}

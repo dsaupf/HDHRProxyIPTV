@@ -130,7 +130,6 @@ void CTuner::ChangeStateToTunedChan(long chan)
 
 void CTuner::ChangeStateToFilteringByProgram(int prog)
 {
-	//m_traces->WriteTrace("CONTROL    :: called in CTuner::ChangeStateToFilteringByProgram()\n", LEVEL_TRZ_4);
 	LOGM(TRZ4,0,"[Tuner %d] called in CTuner::ChangeStateToFilteringByProgram()\n", tuner);
 
 	if (prog != 0)
@@ -240,7 +239,6 @@ int CTuner::ChangeStateToStreaming(char* targ)
 		strcpy(target, "none");
 		transportTuner->setPerformSend(0, tuner);
 
-//		m_traces->WriteTrace("DBG        :: Target to none\n", LEVEL_TRZ_5);
 		LOGM(TRZ5,0,"[Tuner %d] (DBG) Target to none\n", tuner);
 	}
 
@@ -250,7 +248,6 @@ int CTuner::ChangeStateToStreaming(char* targ)
 
 void CTuner::ChangeStateToFilteringByFilter(char* filt, char* ip)
 {
-	//m_traces->WriteTrace("CONTROL    :: called in CTuner::ChangeStateToFilteringByFilter()\n", LEVEL_TRZ_6);
 	LOGM(TRZ6,0,"[Tuner %d] called in CTuner::ChangeStateToFilteringByFilter()\n", tuner);
 
 	int lon = strlen(filt);
@@ -297,35 +294,20 @@ void CTuner::ChangeStateToFilteringByFilter(char* filt, char* ip)
 			canal);
 	}
 
-	//char* log_output = new char[strlen(filter) + 80];
-	char log_output[3000];
-	memset(log_output, 0, 3000);
-
 	if (state == TUNED_CHAN)
 	{
 		state = FILTERING;
-		//if (m_traces->IsLevelWriteable(LEVEL_TRZ_2))
-		//{
-		//	_snprintf(log_output, sizeof(log_output) - 2, "CONTROL    :: [Tuner %d] Change State: FLTR [%s] : PID filtering: %s\n", tuner, ip, CStringA(pidsToFiltering));
-		//	m_traces->WriteTrace(log_output, LEVEL_TRZ_2);
-		//}
 		LOGM(TRZ2,1,"[Tuner %d] Change State: FLTR [%s] : PID filtering: %s\n", tuner, ip, CStringA(pidsToFiltering));
 	}
 	else if (state == FILTERING
 		|| state == STREAMING)
 	{
-		//if (m_traces->IsLevelWriteable(LEVEL_TRZ_2))
-		//{
-		//	_snprintf(log_output, sizeof(log_output) - 2, "CONTROL    :: [Tuner %d] Change PID filters [%s] : PID filtering: %s\n", tuner, ip, CStringA(pidsToFiltering));
-		//	m_traces->WriteTrace(log_output, LEVEL_TRZ_2);
-		//}
 		LOGM(TRZ2,1,"[Tuner %d] Change PID filters [%s] : PID filtering: %s\n", tuner, ip, CStringA(pidsToFiltering));
 	}
 }
 
 void CTuner::ChangePIDsByFilterInStreaming(char* filt, char* ip)
 {
-	//m_traces->WriteTrace("CONTROL    :: called CTuner::ChangePIDsByFilterInStreaming()\n", LEVEL_TRZ_6);
 	LOGM(TRZ6,0,"[Tuner %d] called CTuner::ChangePIDsByFilterInStreaming()\n", tuner);
 
 	int lon = strlen(filt);
@@ -376,15 +358,7 @@ void CTuner::ChangePIDsByFilterInStreaming(char* filt, char* ip)
 		m_cfgProxy->getExternalPIDFilteringOfChannel(canal),
 		canal);
 
-	//if (m_traces->IsLevelWriteable(LEVEL_TRZ_3))
-	//{
-		// It's a CONTROL message, but very frequent, then level_3
-		//char log_output[8192];
-		//memset(log_output, 0, 8192);
-		//_snprintf(log_output, sizeof(log_output) - 2, "CONTROL    :: [Tuner %d] Change PIDs list   [%s] : State is STRM. Pids change by Filter: %s [%s]\n", tuner, ip, CStringA(pidsToFiltering), filt);
-		//m_traces->WriteTrace(log_output, LEVEL_TRZ_3);
 	LOGM(TRZ3,1,"[Tuner %d] Change PIDs list   [%s] : State is STRM. Pids change by Filter: %s [%s]\n", tuner, ip, CStringA(pidsToFiltering), filt);
-	//}
 
 	if (m_cfgProxy->getExternalPIDFilteringOfChannel(canal))
 	{
@@ -392,7 +366,6 @@ void CTuner::ChangePIDsByFilterInStreaming(char* filt, char* ip)
 		ret = transportTuner->SendGetHTTPRequest();
 		if (ret < 1 )
 		{
-			//m_traces->WriteTrace("CONTROL    :: Resend HTTP Request fails!\n", LEVEL_TRZ_4);
 			LOGM(TRZ4,0,"[Tuner %d] Resend HTTP Request fails!\n", tuner);
 		}
 	}
@@ -400,7 +373,6 @@ void CTuner::ChangePIDsByFilterInStreaming(char* filt, char* ip)
 
 void CTuner::ChangePIDsByProgramInStreaming(int prog, char* ip)
 {
-	//m_traces->WriteTrace("CONTROL    :: called in CTuner::ChangePIDsByProgramInStreaming()\n", LEVEL_TRZ_6);
 	LOGM(TRZ6,0,"[Tuner %d] called in CTuner::ChangePIDsByProgramInStreaming()\n", tuner);
 
 	if (prog != 0)
@@ -421,13 +393,6 @@ void CTuner::ChangePIDsByProgramInStreaming(int prog, char* ip)
 		m_cfgProxy->getExternalPIDFilteringOfChannel(canal),
 		canal);
 
-	//if (m_traces->IsLevelWriteable(LEVEL_TRZ_2))
-	//{
-	//	char log_output[1024];
-	//	memset(log_output, 0, 1024);
-	//	_snprintf(log_output, sizeof(log_output) - 2, "CONTROL    :: [Tuner %d] Change PIDs list   [%s] : State is STRM. Pids change by Program: %s\n", tuner, ip, CStringA(pidsToFiltering));
-	//	m_traces->WriteTrace(log_output, LEVEL_TRZ_2);
-	//}
 	LOGM(TRZ2,1,"[Tuner %d] Change PIDs list   [%s] : State is STRM. Pids change by Program: %s\n", tuner, ip, CStringA(pidsToFiltering));
 	
 	if (m_cfgProxy->getExternalPIDFilteringOfChannel(canal))
@@ -441,14 +406,9 @@ CString CTuner::ConvertHexPidsListToNum(CString filterpids)
 
 	if (!m_traces->IsPrintable((char*)CStringA(filterpids).GetString()))
 	{
-		//m_traces->WriteTrace("CONTROL    :: warning in CTuner::ConvertHexPidsListToNum() because list is binary!\n", LEVEL_TRZ_4);
 		LOGM(TRZ4,0,"[Tuner %d] warning in CTuner::ConvertHexPidsListToNum() because list is binary!\n", tuner);
 		return numericPids;
 	}
-
-
-	//m_traces->WriteTrace("CONTROL    :: called CTuner::ConvertHexPidsListToNum()\n", LEVEL_TRZ_6);
-	//LOGM(TRZ6,0,"[Tuner %d] called CTuner::ConvertHexPidsListToNum()\n", tuner);
 
 	int index = 0, index1 = 0, index2 = 0, index3 = 0, indexFin = 0, index1Fin = 0;
 	int pid1 = 0, pid2 = 0;
@@ -462,7 +422,6 @@ CString CTuner::ConvertHexPidsListToNum(CString filterpids)
 		// Only one number? Append " " at end!
 		filterpids.AppendChar(' ');
 		index = filterpids.Find(L" ", 0);
-		//m_traces->WriteTrace("CONTROL    :: CTuner::ConvertHexPidsListToNum() special case!\n", LEVEL_TRZ_6);
 		LOGM(TRZ6,0,"[Tuner %d] CTuner::ConvertHexPidsListToNum() special case!\n", tuner);
 	}
 
@@ -477,7 +436,6 @@ CString CTuner::ConvertHexPidsListToNum(CString filterpids)
 			{
 				strcpy(filter, "0x0000-0x1FFF");
 				numericPids.Format(L"");
-				//m_traces->WriteTrace("CONTROL    :: Has arrived a the PID 0x2000 (8192 in decimal) to filter. Configure list of PIDs to \"0x0000-0x1FFF\", desactive PID filtering.\n", LEVEL_TRZ_2);
 				LOGM(TRZ2,0,"[Tuner %d] Has arrived a the PID 0x2000 (8192 in decimal) to filter. Configure list of PIDs to \"0x0000-0x1FFF\", desactive PID filtering.\n", tuner);
 				return numericPids;
 			}
@@ -505,7 +463,6 @@ CString CTuner::ConvertHexPidsListToNum(CString filterpids)
 				{
 					strcpy(filter, "0x0000-0x1FFF");
 					numericPids.Format(L"");
-					//m_traces->WriteTrace("CONTROL    :: Has arrived a the PID 0x2000 (8192 in decimal) to filter. Configure list of PIDs to \"0x0000-0x1FFF\", desactive PID filtering.\n", LEVEL_TRZ_2);
 					LOGM(TRZ2,0,"[Tuner %d] Has arrived a the PID 0x2000 (8192 in decimal) to filter. Configure list of PIDs to \"0x0000-0x1FFF\", desactive PID filtering.\n", tuner);
 					return numericPids;
 				}
@@ -531,7 +488,6 @@ CString CTuner::ConvertHexPidsListToNum(CString filterpids)
 				{
 					strcpy(filter, "0x0000-0x1FFF");
 					numericPids.Format(L"");
-					//m_traces->WriteTrace("CONTROL    :: Has arrived a the PID 0x2000 (8192 in decimal) to filter. Configure list of PIDs to \"0x0000-0x1FFF\", desactive PID filtering.\n", LEVEL_TRZ_2);
 					LOGM(TRZ2,0,"[Tuner %d] Has arrived a the PID 0x2000 (8192 in decimal) to filter. Configure list of PIDs to \"0x0000-0x1FFF\", desactive PID filtering.\n", tuner);
 					return numericPids;
 				}
@@ -559,7 +515,6 @@ CString CTuner::ConvertHexPidsListToNum(CString filterpids)
 					{
 						strcpy(filter, "0x0000-0x1FFF");
 						numericPids.Format(L"");
-						//m_traces->WriteTrace("CONTROL    :: Has arrived a the PID 0x2000 (8192 in decimal) to filter. Configure list of PIDs to \"0x0000-0x1FFF\", desactive PID filtering.\n", LEVEL_TRZ_2);
 						LOGM(TRZ2,0,"[Tuner %d] Has arrived a the PID 0x2000 (8192 in decimal) to filter. Configure list of PIDs to \"0x0000-0x1FFF\", desactive PID filtering.\n", tuner);
 						return numericPids;
 					}
@@ -580,7 +535,6 @@ CString CTuner::ConvertHexPidsListToNum(CString filterpids)
 			{
 				strcpy(filter, "0x0000-0x1FFF");
 				numericPids.Format(L"");
-				//m_traces->WriteTrace("CONTROL    :: Has arrived a the PID 0x2000 (8192 in decimal) to filter. Configure list of PIDs to \"0x0000-0x1FFF\", desactive PID filtering.\n", LEVEL_TRZ_2);
 				LOGM(TRZ2,0,"[Tuner %d] Has arrived a the PID 0x2000 (8192 in decimal) to filter. Configure list of PIDs to \"0x0000-0x1FFF\", desactive PID filtering.\n", tuner);
 				return numericPids;
 			}
@@ -589,8 +543,6 @@ CString CTuner::ConvertHexPidsListToNum(CString filterpids)
 		}
 	}
 
-	//m_traces->WriteTrace("CONTROL    :: returning CTuner::ConvertHexPidsListToNum()\n", LEVEL_TRZ_6);
-	//LOGM(TRZ6,0,"[Tuner %d] returning CTuner::ConvertHexPidsListToNum()\n", tuner);
 	return numericPids;
 }
 

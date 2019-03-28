@@ -124,5 +124,3 @@ public:
 
 #define LOGM(level, only, text, ...) LOGG(m_Traces, "RINGBUFFER ::", level, only, text, ##__VA_ARGS__)    
 };
-
-
