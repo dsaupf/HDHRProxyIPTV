@@ -91,7 +91,8 @@ CHDHRProxyIPTVDlg::CHDHRProxyIPTVDlg(CWnd* pParent /*=NULL*/)
 	if (m_CfgProxy->m_autoCleanLog)
 	{
 		m_GestorProxy->CleanLog();
-		m_trace->WriteTrace("CLEANING LOG\n", LEVEL_TRZ_1);
+		//m_trace->WriteTrace("CLEANING LOG\n", LEVEL_TRZ_1);
+		LOGM(TRZ1,0,"CLEANING LOG\n");
 	}
 }
 
@@ -482,7 +483,8 @@ void CHDHRProxyIPTVDlg::OnBnClickedButtonSave()
 		}
 	}
 
-	m_trace->WriteTrace("Configuration saved in Config INI file\n",LEVEL_TRZ_1);
+	//m_trace->WriteTrace("Configuration saved in Config INI file\n",LEVEL_TRZ_1);
+	LOGM(TRZ1,0,"SAVE CONFIG IN INI FILE\n");
 }
 
 void CHDHRProxyIPTVDlg::OnBnClickedStartProxy()
@@ -532,13 +534,14 @@ void CHDHRProxyIPTVDlg::OnBnClickedButtonChangeLevelTrc()
 	int new_value = m_comboLevelTrc.GetCurSel();
 	int old_value = m_CfgProxy->m_traceLevel;
 
-	if (m_trace->IsLevelWriteable(LEVEL_TRZ_1))
-	{
-		char log_output[500];
-		memset(log_output, 0, 500);
-		_snprintf(log_output, sizeof(log_output) - 2, "CHANGING LOG LEVEL FROM %d TO %d\n", old_value, new_value);
-		m_trace->WriteTrace(log_output, LEVEL_TRZ_1);
-	}
+	//if (m_trace->IsLevelWriteable(LEVEL_TRZ_1))
+	//{
+	//	char log_output[500];
+	//	memset(log_output, 0, 500);
+	//	_snprintf(log_output, sizeof(log_output) - 2, "CHANGING LOG LEVEL FROM %d TO %d\n", old_value, new_value);
+	//	m_trace->WriteTrace(log_output, LEVEL_TRZ_1);
+	//}
+	LOGM(TRZ1,1,"CHANGING LOG LEVEL FROM %d TO %d\n", old_value, new_value);
 
 	m_CfgProxy->m_traceLevel = new_value;
 }
@@ -547,12 +550,14 @@ void CHDHRProxyIPTVDlg::OnBnClickedButtonCleanLog()
 {
 	m_GestorProxy->CleanLog();
 
-	m_trace->WriteTrace("CLEANING LOG\n", LEVEL_TRZ_1);
+	//m_trace->WriteTrace("CLEANING LOG\n", LEVEL_TRZ_1);
+	LOGM(TRZ1,0,"CLEANING LOG\n");
 }
 
 void CHDHRProxyIPTVDlg::OnDestroy()
 {
-	m_trace->WriteTrace("******************* Kill Proxy SATIP2HDHR *******************\n", LEVEL_TRZ_1);
+	//m_trace->WriteTrace("******************* Kill Proxy SATIP2HDHR *******************\n", LEVEL_TRZ_1);
+	LOGM(TRZ1,0,"******************* KILL APPLICATION *******************\n");
 
 	m_GestorProxy->StopProxy();
 
@@ -564,7 +569,8 @@ void CHDHRProxyIPTVDlg::OnBnClickedButtonReloadMappingList()
 	CString chans, ch;
 
 	//Load data from Mapping List file
-	m_trace->WriteTrace("Reading Mapping List\n", LEVEL_TRZ_1);
+	//m_trace->WriteTrace("Reading Mapping List\n", LEVEL_TRZ_1);
+	LOGM(TRZ1,0,"READING MAPPING LIST\n");
 	m_CfgProxy->ReadFileMappingList();
 
 	chans.Format(L"[");
@@ -577,13 +583,14 @@ void CHDHRProxyIPTVDlg::OnBnClickedButtonReloadMappingList()
 	}
 	chans.Append(L"]");
 	
-	if (m_trace->IsLevelWriteable(LEVEL_TRZ_1))
-	{
-		char log_output[2048];
-		memset(log_output, 0, 2048);
-		_snprintf(log_output, sizeof(log_output) - 2, "Reload of MappingList: Number of channels in Mapping List File: %d %s\n", m_CfgProxy->m_numChannels, CStringA(chans));
-		m_trace->WriteTrace(log_output, LEVEL_TRZ_1);
-	}
+	//if (m_trace->IsLevelWriteable(LEVEL_TRZ_1))
+	//{
+	//	char log_output[2048];
+	//	memset(log_output, 0, 2048);
+	//	_snprintf(log_output, sizeof(log_output) - 2, "Reload of MappingList: Number of channels in Mapping List File: %d %s\n", m_CfgProxy->m_numChannels, CStringA(chans));
+	//	m_trace->WriteTrace(log_output, LEVEL_TRZ_1);
+	//}
+	LOGM(TRZ1,0,"Reload of MappingList: Number of channels in Mapping List File: %d %s\n", m_CfgProxy->m_numChannels, CStringA(chans));
 }
 
 void CHDHRProxyIPTVDlg::OnBnClickedButtonResetTuner()

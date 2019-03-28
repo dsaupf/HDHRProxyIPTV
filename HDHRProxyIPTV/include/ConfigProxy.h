@@ -205,4 +205,6 @@ public:
 	int getExternalPIDFilteringOfChannel(long channel);
 
 	void AccessToRestartProxy();
+
+#define LOGM(level, only, text, ...) LOGG(m_trace, "CONFIG     ::", level, only, text, ##__VA_ARGS__)    
 };

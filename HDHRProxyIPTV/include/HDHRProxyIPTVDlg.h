@@ -120,4 +120,6 @@ public:
 	afx_msg void OnTcnSelchangeTabTuners(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedButtonResetTuner();
 	afx_msg void OnBnClickedButtonForceUnlock();
+
+#define LOGM(level, only, text, ...) LOGG(m_trace, "#############", level, only, text, ##__VA_ARGS__)    
 };

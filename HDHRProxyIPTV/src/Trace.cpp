@@ -53,11 +53,11 @@ void CTrace::InitializeTrace(int nivelTrz)
 		m_traceFile = fopen(TRACE_FILE_NAME, "a+");
 
 		if (m_traceFile)
-			WriteTrace("Start LOG of Proxy traces\n", LEVEL_TRZ_2);
+			WriteTrace("Start LOG of Proxy traces\n", TRZ2);
 		else
 		{
 			ObtainCurrentDateTime(cdatetime, sizeof(cdatetime));
-			fprintf(m_traceFile, "%s  :: [ERROR] It has not generated the trace file\n", cdatetime);
+			fprintf(m_traceFile, "%s ## *ERROR* :: It has not generated the trace file\n", cdatetime);
 		}
 
 		fclose(m_traceFile);
@@ -68,7 +68,7 @@ void CTrace::StopTrace()
 {
 	if (m_traceLevel != NO_TRACE)
 	{
-		WriteTrace("Close LOG file\n", LEVEL_TRZ_2);
+		WriteTrace("Close LOG file\n", TRZ2);
 		fclose(m_traceFile);
 	}
 }
@@ -81,7 +81,7 @@ void CTrace::ObtainCurrentDateTime(char* datetime, int size)
 	
 	GetLocalTime(&st);
 
-	_snprintf(datetime, size - 2, "%02d/%02d/%04d %02d:%02d:%02d", st.wDay, st.wMonth, st.wYear, st.wHour, st.wMinute, st.wSecond);
+	_snprintf(datetime, size - 2, "%04d/%02d/%02d %02d:%02d:%02d", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
 
 	//return dateTime;
 }
@@ -121,11 +121,11 @@ void CTrace::WriteTrace(char *traza, int level)
 		m_traceFile = fopen(TRACE_FILE_NAME, "a+");
 
 		if (level == ERR)
-			fprintf(m_traceFile, "%s	:: [ERROR]   %s", cdatetime, traza);
+			fprintf(m_traceFile, "%s ## *ERROR* %s", cdatetime, traza);
 		else if (level == WRNG)
-			fprintf(m_traceFile, "%s	:: [WARNING] %s", cdatetime, traza);
+			fprintf(m_traceFile, "%s ## WARNING %s", cdatetime, traza);
 		else
-			fprintf(m_traceFile, "%s	:: [LEVEL_%d] %s", cdatetime, level, traza);
+			fprintf(m_traceFile, "%s ## DEBUG %d %s", cdatetime, level, traza);
 
 		fclose(m_traceFile);
 	}

@@ -117,4 +117,6 @@ public:
 	int ReconnectConnectionHTTP();
 	int SendNullPackets();
 	void ReconnectHTTP();
+
+#define LOGM(level, only, text, ...) LOGG(m_Traces, "TRANSPORT  ::", level, only, text, ##__VA_ARGS__)    
 };

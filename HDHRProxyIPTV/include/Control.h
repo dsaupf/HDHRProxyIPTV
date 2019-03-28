@@ -106,4 +106,6 @@ public:
 
 	static void CALLBACK TimerProcTuners_Wrapper(HWND hwnd, UINT uMsg, UINT idEvent, DWORD dwTime);
 	void CALLBACK TimerProcTuners(HWND hwnd, UINT uMsg, UINT idEvent, DWORD dwTime);
+
+#define LOGM(level, only, text, ...) LOGG(m_Traces, "CONTROL    ::", level, only, text, ##__VA_ARGS__)    
 };
