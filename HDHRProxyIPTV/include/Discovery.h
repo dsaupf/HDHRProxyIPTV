@@ -51,5 +51,5 @@ public:
 	int TreatReceivedData();
 	int ObtainHDHRServPort() { return m_libHDHR.getPortServHDHR(); }
 
-#define LOGM(level, only, text, ...) LOGG(m_Traces, "DISCOVERY  ::", level, only, text, ##__VA_ARGS__)    
+#define LOGM(level, only, text, ...) LOGG(m_Traces, "DISCOVERY  ::", level, only, text, ##__VA_ARGS__)
 };

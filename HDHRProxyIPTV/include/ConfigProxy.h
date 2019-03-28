@@ -206,5 +206,5 @@ public:
 
 	void AccessToRestartProxy();
 
-#define LOGM(level, only, text, ...) LOGG(m_trace, "CONFIG     ::", level, only, text, ##__VA_ARGS__)    
+#define LOGM(level, only, text, ...) LOGG(m_trace, "CONFIG     ::", level, only, text, ##__VA_ARGS__)
 };

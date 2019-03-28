@@ -57,5 +57,5 @@ public:
 	void ResetTuner(int tuner);
 	void ForceUnlockTuner(int tuner);
 
-#define LOGM(level, only, text, ...) LOGG(m_Traces, "-- TOP EXE --", level, only, text, ##__VA_ARGS__)    
+#define LOGM(level, only, text, ...) LOGG(m_Traces, "-- TOP EXE --", level, only, text, ##__VA_ARGS__)
 };

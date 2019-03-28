@@ -99,42 +99,22 @@ int CGestionProxy::InitializeProxy(int trace, CString idDisp, CString ipHDHR)
 	//Traces are activated to save in log
 	m_Traces->InitializeTrace(trace);
 	
-	//if (m_Traces->IsLevelWriteable(LEVEL_TRZ_1))
-	//{
-    //char nvl[1024];
-    //memset(nvl, 0, 1024);
-    //_snprintf(nvl, sizeof(nvl) - 2, "Trace Level: %d\n", trace);
-    //m_Traces->WriteTrace(nvl, LEVEL_TRZ_1);
     LOGM(TRZ1,0,"Trace Level: %d\n", trace);
 
-    //m_Traces->WriteTrace("******************* Start HDHR IPTV Proxy *******************\n", LEVEL_TRZ_1);
     LOGM(TRZ1,0,"******************* Start HDHR IPTV Proxy *******************\n");
-    //m_Traces->WriteTrace("*** Version HDHRProxyIPTV Application: v1.0.3l\n", LEVEL_TRZ_1);
     LOGM(TRZ1,0,"*** Version HDHRProxyIPTV Application: v1.0.3n\n");
     CStringA idDispTmp(idDisp);
     CStringA ipHDHRTmp(ipHDHR);
-    //_snprintf(nvl, sizeof(nvl) - 2, "*** Device ID: %s\n", idDispTmp);
-    //m_Traces->WriteTrace(nvl, LEVEL_TRZ_1);
     LOGM(TRZ1,0,"*** Device ID: %s\n", idDispTmp);
-    //_snprintf(nvl, sizeof(nvl) - 2, "*** Server IP: %s\n", ipHDHRTmp);
-    //m_Traces->WriteTrace(nvl, LEVEL_TRZ_1);
     LOGM(TRZ1,0,"*** Server IP: %s\n", ipHDHRTmp);
-    //_snprintf(nvl, sizeof(nvl) - 2, "*** Server IP: %d\n", getDiscovery()->ObtainHDHRServPort());
-    //m_Traces->WriteTrace(nvl, LEVEL_TRZ_1);
     LOGM(TRZ1,0,"*** Server PORT: %d\n", getDiscovery()->ObtainHDHRServPort());
-    //_snprintf(nvl, sizeof(nvl) - 2, "*** Number of Tuners configured: %d\n", m_cfgProxy->getTunersNumber());
-    //m_Traces->WriteTrace(nvl, LEVEL_TRZ_1);
     LOGM(TRZ1,0,"*** Number of Tuners configured: %d\n", m_cfgProxy->getTunersNumber());
-    //_snprintf(nvl, sizeof(nvl) - 2, "*** Lock configured: %d\n", m_cfgProxy->getLock());
-    //m_Traces->WriteTrace(nvl, LEVEL_TRZ_1);
     LOGM(TRZ1,0,"*** Lock configured: %d\n", m_cfgProxy->getLock());
 
     TCHAR sDirActual[200];
     GetCurrentDirectory(200, sDirActual);
     CString path;
     path.Format(L"%s\\%s", sDirActual, _T(NAME_FILE_MAPLIST));
-    //_snprintf(nvl, sizeof(nvl) - 2, "*** Mapping List File: %s\n", CStringA(path));
-    //m_Traces->WriteTrace(nvl, LEVEL_TRZ_1);
     LOGM(TRZ1,0,"*** Mapping List File: %s\n", CStringA(path));
     
     CString chans,ch;
@@ -147,10 +127,7 @@ int CGestionProxy::InitializeProxy(int trace, CString idDisp, CString ipHDHR)
             chans.Append(L";");
     }
     chans.Append(L"]");
-    //_snprintf(nvl, sizeof(nvl) - 2, "*** Number of channels in Mapping List File: %d %s\n", m_cfgProxy->m_numChannels, CStringA(chans));
-    //m_Traces->WriteTrace(nvl, LEVEL_TRZ_1);
     LOGM(TRZ1,0,"*** Number of channels in Mapping List File: %d %s\n", m_cfgProxy->m_numChannels, CStringA(chans));
-	//}
 
 	//The first is to start phase Discovery
 	if (!StartDiscovery(trace, idDisp, ipHDHR))
@@ -170,7 +147,6 @@ int CGestionProxy::StartDiscovery(int trace, CString idDisp, CString ipHDHR)
 
 	if (!m_discovery->InicializeListenCliHDHR())
 	{
-		//m_Traces->WriteTrace("Could be not initiate DISCOVERY phase", LEVEL_TRZ_1);
 		LOGM(TRZ1,0,"Could be not initiate DISCOVERY phase");
 
 		return 0;
@@ -190,7 +166,6 @@ int CGestionProxy::StartControl(int trace, CString idDisp, CString ipHDHR)
 
 	if (!m_control->StartHDHRServer())
 	{
-		//m_Traces->WriteTrace("Could be not initiate CONTROL phase", LEVEL_TRZ_1);
 		LOGM(TRZ1,0,"Could be not initiate CONTROL phase");
 		return 0;
 	}
@@ -210,8 +185,6 @@ void CGestionProxy::StopProxy()
 	TerminateThread(hThreadControl, 1001);
 	m_control->StopControl();
 
-
-	//m_Traces->WriteTrace("******************* Stop Proxy SATIP2HDHR *******************\n", LEVEL_TRZ_1);
 	LOGM(TRZ1,0,"******************* Stop Proxy SATIP2HDHR *******************\n");
 	m_Traces->StopTrace();
 }

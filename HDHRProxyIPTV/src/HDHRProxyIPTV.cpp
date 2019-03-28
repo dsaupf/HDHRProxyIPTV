@@ -56,7 +56,7 @@ CHDHRProxyIPTVApp::CHDHRProxyIPTVApp()
 	{
 		CTrace* t = new CTrace();
 		// The mutex exists, there is an instance in execution
-		t->setTraceLevel(2);
+		t->setTraceLevel(TRZ2);
 		t->WriteTraceForceLevel("New Proxy instance. PROXY IS ALREADY IN EXECUTION. This Proxy instance is closing\n", TRZ1);
 		AfxMessageBox(_T("Proxy is already running"), MB_OK);
 		exit(1);
