@@ -31,15 +31,32 @@
 #include "string.h"
 
 #define TRACE_FILE_NAME ".\\HDHRProxyIPTV.log"
-#define NO_TRACE	0
-#define LEVEL_TRZ_1	1
-#define LEVEL_TRZ_2	2
-#define LEVEL_TRZ_3	3
-#define LEVEL_TRZ_4	4
-#define LEVEL_TRZ_5	5	//Traces pf flow http
-#define LEVEL_TRZ_6	6	//Headers of TS packets (188) sent by the Client on HTTP Transport
-#define ERR			7
-#define WRNG		8  //WARNING
+#define NO_TRACE    0
+#define TRZ1	1
+#define TRZ2	2
+#define TRZ3	3
+#define TRZ4    4
+#define TRZ5	5	//Traces pf flow http
+#define TRZ6	6	//Headers of TS packets (188) sent by the Client on HTTP Transport
+#define ERR		7
+#define WRNG	8  //WARNING
+
+#define LOGG(ctrace, header, level, only, text, ...)  \
+	{  \
+		if (!only || level == ctrace->m_cfgProxy->m_traceLevel)  \
+		{  \
+			char log_output[8192];  \
+			int ss = _snprintf(log_output, 14, "%s", header);  \
+			if (ss < 0) ss = 0;  \
+			memset(log_output+ss, 0x20, sizeof(log_output)-ss);  \
+			memset(log_output+sizeof(log_output)-2, 0, 1);  \
+			if (ctrace->IsLevelWriteable(level))  \
+			{  \
+				_snprintf(log_output+14, sizeof(log_output)-16, text, ##__VA_ARGS__);  \
+				ctrace->WriteTrace(log_output, level);  \
+			}  \
+		}  \
+	}
 
 class CTrace
 {

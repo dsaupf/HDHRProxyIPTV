@@ -81,9 +81,10 @@ void CConfigProxy::ReadFileINI()
 	if (m_Lock != 0 && m_Lock != 1)
 		m_Lock = 0;
 
-	CString t = AfxGetApp()->GetProfileString(section, L"MAX_TIME_SEND_DGRAM", _T(MAX_TIME_TO_SEND_S));
-	t.Replace(L"\"", L"");
-	m_maxTimeToSendDgram = atoll(CStringA(t));
+	//CString t = AfxGetApp()->GetProfileString(section, L"MAX_TIME_SEND_DGRAM", _T(MAX_TIME_TO_SEND_S));
+	//t.Replace(L"\"", L"");
+	//m_maxTimeToSendDgram = atoll(CStringA(t));
+	m_maxTimeToSendDgram = MAX_TIME_TO_SEND;
 	m_maxTimeToPacket = m_maxTimeToSendDgram / 7;
 
 	m_FullTSReplace = AfxGetApp()->GetProfileString(section, L"FULL_TS_REPLACE");
@@ -186,10 +187,10 @@ int CConfigProxy::SaveItems()
 	if (!AfxGetApp()->WriteProfileInt(seccion, _T("LOCK"), m_Lock))
 		return 0;
 
-	CString t;
-	t.Format(L"%I64d", m_maxTimeToSendDgram);
-	if (!AfxGetApp()->WriteProfileString(seccion, _T("MAX_TIME_SEND_DGRAM"), t))
-		return 0;
+	//CString t;
+	//t.Format(L"%I64d", m_maxTimeToSendDgram);
+	//if (!AfxGetApp()->WriteProfileString(seccion, _T("MAX_TIME_SEND_DGRAM"), t))
+	//	return 0;
 
 	// EMU_DEBUG Section
 	seccion = L"EMU_DEBUG";
@@ -285,8 +286,6 @@ void CConfigProxy::ReadFileMappingList()
 {
 	CString seccion, chNum, ch;
 	double fch;
-	char log_output[1024];
-	memset(log_output, 0, 1024);
 	int errFormat = 0;
 	
 
@@ -308,7 +307,9 @@ void CConfigProxy::ReadFileMappingList()
 
 	m_numChannels = AfxGetApp()->GetProfileInt(seccion, L"NUM_CHANNELS", 0);
 	if (m_numChannels ==0)
-		m_trace->WriteTrace("Mapping List: NUM_CHANNELS is 0 or not defined\n", WRNG);
+		{
+		LOGM(WRNG,0,"Mapping List: NUM_CHANNELS is 0 or not defined\n");
+		}
 
 	if (m_numChannels != 0)
 		m_infoChannels = new ChannelMappingList[m_numChannels];
@@ -322,11 +323,7 @@ void CConfigProxy::ReadFileMappingList()
 		ch = AfxGetApp()->GetProfileString(chNum, L"Channel", 0);
 		if (!ch.Compare(L"0") || !ch.Compare(L""))
 		{
-			if (m_trace->IsLevelWriteable(WRNG))
-			{
-				_snprintf(log_output, sizeof(log_output) - 2, "Mapping List: Channel of CH%d is 0 or not defined\n", i);
-				m_trace->WriteTrace(log_output, WRNG);
-			}
+			LOGM(WRNG,1,"Mapping List: Channel of CH%d is 0 or not defined\n", i);
 		}
 
 		if (ch.Find(L".") == -1)
@@ -341,20 +338,12 @@ void CConfigProxy::ReadFileMappingList()
 		m_infoChannels[j].LowFreq = atol(CStringA(AfxGetApp()->GetProfileString(chNum, L"LowFreq")));
 		if (m_infoChannels[j].LowFreq == 0)
 		{
-			if (m_trace->IsLevelWriteable(WRNG))
-			{
-				_snprintf(log_output, sizeof(log_output) - 2, "Mapping List: LowFreq of CH%d is 0 or not defined\n", i);
-				m_trace->WriteTrace(log_output, WRNG);
-			}
+			LOGM(WRNG,1,"Mapping List: LowFreq of CH%d is 0 or not defined\n", i);
 		}
 		m_infoChannels[j].HighFreq = atol(CStringA(AfxGetApp()->GetProfileString(chNum, L"HighFreq")));
 		if (m_infoChannels[j].HighFreq == 0)
 		{
-			if (m_trace->IsLevelWriteable(WRNG))
-			{
-				_snprintf(log_output, sizeof(log_output) - 2, "Mapping List: HighFreq of CH%d is 0 or not defined\n", i);
-				m_trace->WriteTrace(log_output, WRNG);
-			}
+			LOGM(WRNG,1,"Mapping List: HighFreq of CH%d is 0 or not defined\n", i);
 		}
 		m_infoChannels[j].Protocol = AfxGetApp()->GetProfileString(chNum, L"Protocol");
 		m_infoChannels[j].URLGet = AfxGetApp()->GetProfileString(chNum, L"URLGet");
@@ -369,7 +358,7 @@ void CConfigProxy::ReadFileMappingList()
 			m_infoChannels[j].InternalPIDFiltering.Compare(L"n"))
 		{	
 			m_infoChannels[j].InternalPIDFiltering.Format(L"N");
-			m_trace->WriteTrace("Mapping List: The value of InternalPIDFiltering must be 'Y' or 'N'. The default value will be 'N'\n", WRNG);
+			LOGM(WRNG,0,"Mapping List: The value of InternalPIDFiltering must be 'Y' or 'N'. The default value will be 'N'\n");
 		}
 		m_infoChannels[j].ExternalPIDFiltering = AfxGetApp()->GetProfileString(chNum, L"ExternalPIDFiltering");
 		if (m_infoChannels[j].ExternalPIDFiltering.Compare(L"Y") &&
@@ -378,7 +367,7 @@ void CConfigProxy::ReadFileMappingList()
 			m_infoChannels[j].ExternalPIDFiltering.Compare(L"n"))
 		{
 			m_infoChannels[j].ExternalPIDFiltering.Format(L"N");
-			m_trace->WriteTrace("Mapping List: The value of ExternalPIDFilteringmust be 'Y' or 'N'. The default value will be 'N'\n", WRNG);
+			LOGM(WRNG,0,"Mapping List: The value of ExternalPIDFilteringmust be 'Y' or 'N'. The default value will be 'N'\n");
 		}
 		
 		m_infoChannels[j].signalStrength = AfxGetApp()->GetProfileInt(chNum, L"Signal_Strength", ss_DEF);
@@ -400,22 +389,14 @@ void CConfigProxy::ReadFileMappingList()
 			m_infoChannels[j].Program_table = ParserProgramTable(m_infoChannels[j].Program_table, &m_infoChannels[j]);
 			if (!m_infoChannels[j].Program_table.Compare(L""))
 			{
-				if (m_trace->IsLevelWriteable(WRNG))
-				{
-					_snprintf(log_output, sizeof(log_output) - 2, "Mapping List: Program_table of CH%d is not defined\n", i);
-					m_trace->WriteTrace(log_output, WRNG);
-				}
+				LOGM(WRNG,1,"Mapping List: Program_table of CH%d is not defined\n", i);
 			}
 		}
 		else
 		{
 			m_infoChannels[j].Program_table.Format(L"");
 
-			if (m_trace->IsLevelWriteable(WRNG))
-			{
-				_snprintf(log_output, sizeof(log_output) - 2, "Mapping List: Program_table of CH%d is not defined\n", i);
-				m_trace->WriteTrace(log_output, WRNG);
-			}
+			LOGM(WRNG,1,"Mapping List: Program_table of CH%d is not defined\n", i);
 		}
 
 		//Treatment data transport protocol of Transport Stream
@@ -438,11 +419,7 @@ void CConfigProxy::ReadFileMappingList()
 			{
 				m_infoChannels[j].URLGet.Format(L"");
 				m_infoChannels[j].URLGet_ExtPidFilt = m_infoChannels[j].URLGet;
-				if (m_trace->IsLevelWriteable(WRNG))
-				{
-					_snprintf(log_output, sizeof(log_output) - 2, "Mapping List: URLGet of CH%d is not defined. Protocol is HTTP\n", i);
-					m_trace->WriteTrace(log_output, WRNG);
-				}
+				LOGM(WRNG,1,"Mapping List: URLGet of CH%d is not defined. Protocol is HTTP\n", i);
 			}
 			else
 			{
@@ -471,11 +448,7 @@ void CConfigProxy::ReadFileMappingList()
 					errFormat = 1;
 				if (errFormat)
 				{
-					if (m_trace->IsLevelWriteable(WRNG))
-					{
-						_snprintf(log_output, sizeof(log_output) - 2, "Mapping List: URLGet of CH%d can have an incorrect format, look over it. Protocol is HTTP\n", i);
-						m_trace->WriteTrace(log_output, WRNG);
-					}
+					LOGM(WRNG,1,"Mapping List: URLGet of CH%d can have an incorrect format, look over it. Protocol is HTTP\n", i);
 				}
 			}
 		}
@@ -488,11 +461,7 @@ void CConfigProxy::ReadFileMappingList()
 				|| !m_infoChannels[j].UDPsource.Compare(L"NONE"))
 			{
 				m_infoChannels[j].UDPsource.Format(L"");
-				if (m_trace->IsLevelWriteable(WRNG))
-				{
-					_snprintf(log_output, sizeof(log_output) - 2, "Mapping List: UDPsource of CH%d is not defined. Protocol is UDP\n", i);
-					m_trace->WriteTrace(log_output, WRNG);
-				}
+				LOGM(WRNG,1,"Mapping List: UDPsource of CH%d is not defined. Protocol is UDP\n", i);
 			}
 			else
 			{
@@ -516,21 +485,13 @@ void CConfigProxy::ReadFileMappingList()
 
 				if (errFormat)
 				{
-					if (m_trace->IsLevelWriteable(WRNG))
-					{
-						_snprintf(log_output, sizeof(log_output) - 2, "Mapping List: UDPsource of CH%d can have an incorrect format, look over it. Protocol is UDP\n", i);
-						m_trace->WriteTrace(log_output, WRNG);
-					}
+					LOGM(WRNG,1,"Mapping List: UDPsource of CH%d can have an incorrect format, look over it. Protocol is UDP\n", i);
 				}
 			}
 		}
 		else
 		{
-			if (m_trace->IsLevelWriteable(WRNG))
-			{
-				_snprintf(log_output, sizeof(log_output) - 2, "Mapping List: Protocol of CH%d is not defined (HTTP/UDP)\n", i);
-				m_trace->WriteTrace(log_output, WRNG);
-			}
+			LOGM(WRNG,1,"Mapping List: Protocol of CH%d is not defined (HTTP/UDP)\n", i);
 		}
 	}
 }

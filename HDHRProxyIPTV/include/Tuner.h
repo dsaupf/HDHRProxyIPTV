@@ -102,4 +102,6 @@ public:
 	void SetTimers();
 	int CheckTimer();
 	_int64 CTuner::CompareSystemTime(SYSTEMTIME st1, SYSTEMTIME st2);
+
+#define LOGM(level, only, text, ...) LOGG(m_traces, "CTRL-TUNER ::", level, only, text, ##__VA_ARGS__)    
 };

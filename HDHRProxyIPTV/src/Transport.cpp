@@ -50,15 +50,11 @@ DWORD CTransport::ListeningThreadTransport()
 
 int CTransport::StartThreadTransport()
 {
-	char log_output[1024];
-	memset(log_output, 0, 1024);
-
 	//Creation of Thread for listen and send of Transport Stream
 	hThreadTransport = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)Listening__ThreadTransport, this, 0, 0);
 	SetThreadPriority(hThreadTransport, THREAD_PRIORITY_HIGHEST);
 
-	_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Create Transport thread %d\n", m_tuner,hThreadTransport);
-	m_Traces->WriteTrace(log_output, LEVEL_TRZ_4);
+	LOGM(TRZ4,0,"[Tuner %d] Create Transport thread %d\n", m_tuner,hThreadTransport);
 
 	return 1;
 }
@@ -78,7 +74,7 @@ void CTransport::StopThreadTransport()
 
 	if (hThreadTransport != 0)
 	{
-		m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Calling to KILL a working thread!\n", LEVEL_TRZ_3);
+		LOGM(TRZ3,0,"[Tuner %d] Calling to KILL a working thread!\n", m_tuner);
 		Sleep(50); // wait for flush the LOG!
 		TerminateThread(hThreadTransport, 1002);
 		hThreadTransport = 0;
@@ -134,9 +130,6 @@ CTransport::~CTransport()
 
 int CTransport::InitilizeTransportStream(int channel, CString pidsToFilterList)
 {
-	char log_output[5500];
-	memset(log_output, 0, 5500);
-
 	int res = 1;
 
 	m_PosChannelInMapList = cfgProxy->ObtainIndexChannel(channel);
@@ -145,7 +138,7 @@ int CTransport::InitilizeTransportStream(int channel, CString pidsToFilterList)
 
 	if (m_PosChannelInMapList == -1)
 	{
-		m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Could be not initiate TRANSPORT phase. Channel not in MAPPING LIST.\n", ERR);
+		LOGM(ERR,0,"[Tuner %d] Could be not initiate TRANSPORT phase. Channel not in MAPPING LIST.\n", m_tuner);
 		return -1;
 	}
 
@@ -156,11 +149,7 @@ int CTransport::InitilizeTransportStream(int channel, CString pidsToFilterList)
 		m_typeTransportInput = UDP_TS;
 		if (!cfgProxy->m_infoChannels[m_PosChannelInMapList].UDPsource.Compare(L""))
 		{
-			if (m_Traces->IsLevelWriteable(LEVEL_TRZ_1))
-			{
-				_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Channel not tuned. Not defined UDPsource information in MappingList for channel %ld.\n", m_tuner, channel);
-				m_Traces->WriteTrace(log_output, LEVEL_TRZ_1);
-			}
+			LOGM(TRZ1,1,"[Tuner %d] Channel not tuned. Not defined UDPsource information in MappingList for channel %ld.\n", m_tuner, channel);
 			return -2;
 		}
 	}
@@ -169,21 +158,13 @@ int CTransport::InitilizeTransportStream(int channel, CString pidsToFilterList)
 		m_typeTransportInput = HTTP_TS;
 		if (!cfgProxy->m_infoChannels[m_PosChannelInMapList].URLGet.Compare(L""))
 		{
-			if (m_Traces->IsLevelWriteable(LEVEL_TRZ_1))
-			{
-				_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Channel not tuned. Not defined URLGet information in MappingList for channel %ld.\n", m_tuner, channel);
-				m_Traces->WriteTrace(log_output, LEVEL_TRZ_1);
-			}
+			LOGM(TRZ1,1,"[Tuner %d] Channel not tuned. Not defined URLGet information in MappingList for channel %ld.\n", m_tuner, channel);
 			return -2;
 		}
 	}
 	else
 	{
-		if (m_Traces->IsLevelWriteable(LEVEL_TRZ_1))
-		{
-			_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Channel not tuned. Not defined Protocol information (HTTP/UDP) in MappingList for channel %ld.\n", m_tuner, channel);
-			m_Traces->WriteTrace(log_output, LEVEL_TRZ_1);
-		}
+		LOGM(TRZ1,1,"[Tuner %d] Channel not tuned. Not defined Protocol information (HTTP/UDP) in MappingList for channel %ld.\n", m_tuner, channel);
 		return -2;
 	}
 	
@@ -198,11 +179,7 @@ int CTransport::InitilizeTransportStream(int channel, CString pidsToFilterList)
 		|| (!cfgProxy->m_infoChannels[m_PosChannelInMapList].UDPsource.Compare(L""))))
 		)
 	{
-		if (m_Traces->IsLevelWriteable(LEVEL_TRZ_1))
-		{
-			_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Channel not tuned. Not defined all Protocol information in MappingList for channel %ld.\n", m_tuner, channel);
-			m_Traces->WriteTrace(log_output, LEVEL_TRZ_1);
-		}
+		LOGM(TRZ1,1,"[Tuner %d] Channel not tuned. Not defined all Protocol information in MappingList for channel %ld.\n", m_tuner, channel);
 		return 0;
 	}
 
@@ -212,22 +189,13 @@ int CTransport::InitilizeTransportStream(int channel, CString pidsToFilterList)
 		{
 			m_PerformSend = 1;
 
-			m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] HDHR server ready to receive Transport Stream Packages over UDP\n", LEVEL_TRZ_3);
-
-			if (m_Traces->IsLevelWriteable(LEVEL_TRZ_2))
-			{
-				_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Listening by [UDP] %s:%d. Sending to [UDP] %s:%d\n", m_tuner, CStringA(cfgProxy->m_infoChannels[m_PosChannelInMapList].ipUDP), cfgProxy->m_infoChannels[m_PosChannelInMapList].puertoUDP, m_ipSend, m_portSend);
-				m_Traces->WriteTrace(log_output, LEVEL_TRZ_2);
-			}
+			LOGM(TRZ3,0,"[Tuner %d] HDHR server ready to receive Transport Stream Packages over UDP\n", m_tuner);
+			LOGM(TRZ2,1,"[Tuner %d] Listening by [UDP] %s:%d. Sending to [UDP] %s:%d\n", m_tuner, CStringA(cfgProxy->m_infoChannels[m_PosChannelInMapList].ipUDP), cfgProxy->m_infoChannels[m_PosChannelInMapList].puertoUDP, m_ipSend, m_portSend);
 		}
 		else
 		{
-			m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Could be not initiate TRANSPORT phase (Protocol UDP)\n", ERR);
-			if (m_Traces->IsLevelWriteable(ERR))
-			{
-				_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] ERR: [UDP] In: %s:%d ; Out: %s:%d\n", m_tuner, CStringA(cfgProxy->m_infoChannels[m_PosChannelInMapList].ipUDP), cfgProxy->m_infoChannels[m_PosChannelInMapList].puertoUDP, m_ipSend, m_portSend);
-				m_Traces->WriteTrace(log_output, ERR);
-			}
+			LOGM(ERR,0,"[Tuner %d] Could be not initiate TRANSPORT phase (Protocol UDP)\n", m_tuner);
+			LOGM(ERR,1,"[Tuner %d] ERR: [UDP] In: %s:%d ; Out: %s:%d\n", m_tuner, CStringA(cfgProxy->m_infoChannels[m_PosChannelInMapList].ipUDP), cfgProxy->m_infoChannels[m_PosChannelInMapList].puertoUDP, m_ipSend, m_portSend);
 			return 0;
 		}
 	}
@@ -240,20 +208,13 @@ int CTransport::InitilizeTransportStream(int channel, CString pidsToFilterList)
 
 			m_PerformSend = 1;
 
-			m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] HDHR server ready to receive Transport Stream Packages over HTTP\n", LEVEL_TRZ_3);
-
-			if (m_Traces->IsLevelWriteable(LEVEL_TRZ_2))
-			{
-				_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Listening by [HTTP] http://%s:%d/%s. Sending to [UDP] %s:%d\n", m_tuner, CStringA(cfgProxy->m_infoChannels[m_PosChannelInMapList].ipHTTP), cfgProxy->m_infoChannels[m_PosChannelInMapList].puertoHTTP, CStringA(m_dataGETHTTP), m_ipSend, m_portSend);
-				m_Traces->WriteTrace(log_output, LEVEL_TRZ_2);
-			}
+			LOGM(TRZ3,0,"[Tuner %d] HDHR server ready to receive Transport Stream Packages over HTTP\n", m_tuner);
+			LOGM(TRZ2,1,"[Tuner %d] Listening by [HTTP] http://%s:%d/%s. Sending to [UDP] %s:%d\n", m_tuner, CStringA(cfgProxy->m_infoChannels[m_PosChannelInMapList].ipHTTP), cfgProxy->m_infoChannels[m_PosChannelInMapList].puertoHTTP, CStringA(m_dataGETHTTP), m_ipSend, m_portSend);
 		}
 		else
 		{
-			m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Could be not initiate TRANSPORT phase (Protocol HTTP)\n", LEVEL_TRZ_1);
-
-			_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] ERR: [HTTP] In: http://%s:%d/%s ; Out: %s:%d\n", m_tuner, CStringA(cfgProxy->m_infoChannels[m_PosChannelInMapList].ipHTTP), cfgProxy->m_infoChannels[m_PosChannelInMapList].puertoHTTP, CStringA(cfgProxy->m_infoChannels[m_PosChannelInMapList].datosGETHTTP), m_ipSend, m_portSend);
-			m_Traces->WriteTrace(log_output, ERR);
+			LOGM(TRZ1,0,"[Tuner %d] Could be not initiate TRANSPORT phase (Protocol HTTP)\n", m_tuner);
+			LOGM(ERR,0,"[Tuner %d] ERR: [HTTP] In: http://%s:%d/%s ; Out: %s:%d\n", m_tuner, CStringA(cfgProxy->m_infoChannels[m_PosChannelInMapList].ipHTTP), cfgProxy->m_infoChannels[m_PosChannelInMapList].puertoHTTP, CStringA(cfgProxy->m_infoChannels[m_PosChannelInMapList].datosGETHTTP), m_ipSend, m_portSend);
 			m_errConnectionIni = 1;
 			res = 0;
 		}
@@ -278,7 +239,7 @@ int CTransport::InitializeTransportStreamUDP()
 	res = WSAStartup(MAKEWORD(2, 2), &WsaDat);
 	if (res)	//If err is 0, ko
 	{
-		m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Error initializing use of WinSock.\n", ERR);
+		LOGM(ERR,0,"[Tuner %d] Error initializing use of WinSock.\n", m_tuner);
 		return 0;
 	}
 
@@ -287,7 +248,7 @@ int CTransport::InitializeTransportStreamUDP()
 
 	if (m_socketUDP == INVALID_SOCKET)
 	{
-		m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Error in creation of UDP Socket\n", ERR);
+		LOGM(ERR,0,"[Tuner %d] Error in creation of UDP Socket\n", m_tuner);
 		return 0;
 	}
 
@@ -321,12 +282,9 @@ int CTransport::InitializeTransportStreamUDP()
 		res = WSAGetLastError();
 		closesocket(m_socketUDP);
 		m_socketUDP = -1;
-		char * log_output = new char[1024];
-		memset(log_output, 0, 1024);
 
-		_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Has not been able to associate (bind) socket direction. Error %d\n", m_tuner, res);
-		m_Traces->WriteTrace(log_output, ERR);
-		delete[] log_output;
+		LOGM(ERR,0,"[Tuner %d] Has not been able to associate (bind) socket direction. Error %d\n", m_tuner, res);
+
 		return 0;
 	}
 
@@ -338,8 +296,6 @@ void CTransport::TreatReceivedDataTS()
 	int attemptsReconn = 0;
 	int reconnect = 0;
 	int err = 0;
-	char log_output[1024];
-	memset(log_output, 0, 1024);
 
 	if (m_typeTransportInput == UDP_TS)
 		TreatReceivedDataUDP();
@@ -347,11 +303,7 @@ void CTransport::TreatReceivedDataTS()
 	{
 		if (TreatReceivedDataHTTP() == -1) //Close
 		{
-			if (m_Traces->IsLevelWriteable(LEVEL_TRZ_3) && (getState()!=0))
-			{
-				_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Try to reconnect connection HTTP.\n", m_tuner);
-				m_Traces->WriteTrace(log_output, LEVEL_TRZ_3);
-			}
+			LOGM(TRZ3,1,"[Tuner %d] Try to reconnect connection HTTP.\n", m_tuner);
 
 			while (attemptsReconn < 50 && !reconnect)
 			{
@@ -362,10 +314,9 @@ void CTransport::TreatReceivedDataTS()
 
 			if (!reconnect)
 			{
-				if (m_Traces->IsLevelWriteable(LEVEL_TRZ_2) && (getState() != 0))
+				if (getState() != 0)
 				{
-					_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Not possible to reconnect connection HTTP.\n", m_tuner);
-					m_Traces->WriteTrace(log_output, LEVEL_TRZ_2);
+					LOGM(TRZ2,1,"[Tuner %d] Not possible to reconnect connection HTTP.\n", m_tuner);
 				}
 				m_failedConnectHTTP = 1;
 				m_refreshFailedConnHTTP = 1;
@@ -373,10 +324,9 @@ void CTransport::TreatReceivedDataTS()
 			}
 			else
 			{
-				if (m_Traces->IsLevelWriteable(LEVEL_TRZ_2) && (getState() != 0))
+				if (getState() != 0)
 				{
-					_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Connection HTTP is reconnected.\n", m_tuner);
-					m_Traces->WriteTrace(log_output, LEVEL_TRZ_2);
+					LOGM(TRZ2,1,"[Tuner %d] Connection HTTP is reconnected.\n", m_tuner);
 				}
 			}
 		}
@@ -389,8 +339,6 @@ int CTransport::TreatReceivedDataUDP()
 		return 1;
 
 	int res;
-	char log_output[1024];
-	memset(log_output, 0, 1024);
 	char *RecvBuf = new char[1316];
 	int BufLen = 1316;
 	sockaddr_in SenderAddr;
@@ -401,8 +349,7 @@ int CTransport::TreatReceivedDataUDP()
 	if (res == SOCKET_ERROR) {
 			if (WSAGetLastError() != 10054)
 			{
-				_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Error %d at UDP data reception\n", m_tuner, WSAGetLastError());
-				m_Traces->WriteTrace(log_output, ERR);
+				LOGM(ERR,0,"[Tuner %d] Error %d at UDP data reception\n", m_tuner, WSAGetLastError());
 				delete[] RecvBuf;
 				return 0;
 			}
@@ -430,8 +377,7 @@ int CTransport::TreatReceivedDataUDP()
 			else break;
 		}
 		if (ntry>=5) {
-			_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Error=%d sending UDP data.\n", m_tuner, WSAGetLastError());
-			m_Traces->WriteTrace(log_output, ERR);
+			LOGM(ERR,0,"[Tuner %d] Error=%d sending UDP data.\n", m_tuner, WSAGetLastError());
 			delete[] RecvBuf;
 			return 0;
 		}
@@ -495,15 +441,13 @@ void CTransport::AssignDataSend(char* target)
 	strcpy(m_ipSend, ip2);
 	m_portSend = atoi(port2);
 	
-	if (m_Traces->IsLevelWriteable(LEVEL_TRZ_3))
+	if (m_typeTransportOutput == RTP_TS)
 	{
-		char log_output[1000];
-		if (m_typeTransportOutput == RTP_TS)
-			_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Sending to [RTP] %s:%d\n", m_tuner, m_ipSend, m_portSend);
-		else
-			_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Sending to [UDP] %s:%d\n", m_tuner, m_ipSend, m_portSend);
-
-		m_Traces->WriteTrace(log_output, LEVEL_TRZ_3);
+		LOGM(TRZ3,1,"[Tuner %d] Sending to [RTP] %s:%d\n", m_tuner, m_ipSend, m_portSend);
+	}
+	else
+	{
+		LOGM(TRZ3,1,"[Tuner %d] Sending to [UDP] %s:%d\n", m_tuner, m_ipSend, m_portSend);
 	}
 }
 
@@ -517,7 +461,7 @@ int CTransport::InitilizeTransportStreamHTTP()
 
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
 	{
-		m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Error initializing use of WinSock [HTTP].\n", ERR);
+		LOGM(ERR,0,"[Tuner %d] Error initializing use of WinSock [HTTP].\n", m_tuner);
 		return 0;
 	}
 
@@ -529,7 +473,7 @@ int CTransport::InitilizeTransportStreamHTTP()
 	
 	if ((m_socketHTTP = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 	{
-		m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Error in creation of HTTP(TCP) Socket\n", ERR);
+		LOGM(ERR,0,"[Tuner %d] Error in creation of HTTP(TCP) Socket\n", m_tuner);
 		return 0;
 	}
 
@@ -547,10 +491,7 @@ int CTransport::InitilizeTransportStreamHTTP()
 	if (connect(m_socketHTTP, (struct sockaddr *)&addr, sizeof(addr)) < 0)
 	{
 		int err = WSAGetLastError();
-		char log_output[1024];
-		memset(log_output, 0, 1024);
-		_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Can not connect to HTTP://%s:%d. Error code %d\n", m_tuner, CStringA(cfgProxy->m_infoChannels[m_PosChannelInMapList].ipHTTP), cfgProxy->m_infoChannels[m_PosChannelInMapList].puertoHTTP, err);
-		m_Traces->WriteTrace(log_output, ERR);
+		LOGM(ERR,0,"[Tuner %d] Can not connect to HTTP://%s:%d. Error code %d\n", m_tuner, CStringA(cfgProxy->m_infoChannels[m_PosChannelInMapList].ipHTTP), cfgProxy->m_infoChannels[m_PosChannelInMapList].puertoHTTP, err);
 		shutdown(m_socketHTTP, SD_BOTH);
 		closesocket(m_socketHTTP);
 		m_socketHTTP = -1;
@@ -562,17 +503,11 @@ int CTransport::InitilizeTransportStreamHTTP()
 
 int CTransport::SendGetHTTPRequest()
 {
-	char log_output[1024];
-	memset(log_output, 0, 1024);
 	char *msg = new char[5200];
 	memset(msg, 0, 5200);
 	_snprintf(msg, 5200 - 2, "GET /%s HTTP/1.1\r\n\r\n", CStringA(m_dataGETHTTP));
 
-	if (m_Traces->IsLevelWriteable(LEVEL_TRZ_3))
-	{
-		_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Resending Request HTTP message(GET): \"GET /%s HTTP/1.1\"\n", m_tuner, CStringA(m_dataGETHTTP));
-		m_Traces->WriteTrace(log_output, LEVEL_TRZ_3);
-	}
+	LOGM(TRZ3,1,"[Tuner %d] Resending Request HTTP message(GET): \"GET /%s HTTP/1.1\"\n", m_tuner, CStringA(m_dataGETHTTP));
 
 	if (send(m_socketHTTP, msg, strlen(msg), 0) < 0)
 	{
@@ -587,8 +522,6 @@ int CTransport::TreatReceivedDataHTTP()
 {
 	char msg[5000];
 	memset(msg, 0, 5000);
-	char log_output[40000];
-	memset(log_output, 0, 40000);
 	char nullPaddingPckt[MAX_SIZE_DATAGRAM_TO_SEND];
 	char dataR[MAX_SIZE_DATAGRAM_TO_SEND*25];
 	int recv_size = 1316;
@@ -610,11 +543,7 @@ int CTransport::TreatReceivedDataHTTP()
 
 	_snprintf(msg, sizeof(msg) - 2, "GET /%s HTTP/1.1\r\n\r\n", CStringA(m_dataGETHTTP));
 	
-	if (m_Traces->IsLevelWriteable(LEVEL_TRZ_3))
-	{
-		_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Sending Request HTTP message(GET): \"GET /%s HTTP/1.1\"\n", m_tuner, CStringA(m_dataGETHTTP));
-		m_Traces->WriteTrace(log_output, LEVEL_TRZ_3);
-	}
+	LOGM(TRZ3,1,"[Tuner %d] Sending Request HTTP message(GET): \"GET /%s HTTP/1.1\"\n", m_tuner, CStringA(m_dataGETHTTP));
 
 	if (send(m_socketHTTP, msg, strlen(msg), 0) < 0)
 	{
@@ -646,17 +575,12 @@ int CTransport::TreatReceivedDataHTTP()
 	}
 	if (ntry>=5)
 	{
-		_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Error=%d sending initial packet to UDP with padding %s:%d\n", m_tuner, WSAGetLastError(), m_ipSend, m_portSend);
-		m_Traces->WriteTrace(log_output, ERR);
+		LOGM(ERR,0,"[Tuner %d] Error=%d sending initial packet to UDP with padding %s:%d\n", m_tuner, WSAGetLastError(), m_ipSend, m_portSend);
 
 		return 0;
 	}
 	
-	if (m_Traces->IsLevelWriteable(LEVEL_TRZ_4))
-	{
-		_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Send an initial UDP datagram with %d null padding packets to client.\n", m_tuner, NUM_PACKETS_TO_SEND);
-		m_Traces->WriteTrace(log_output, LEVEL_TRZ_4);
-	}
+	LOGM(TRZ4,1,"[Tuner %d] Send an initial UDP datagram with %d null padding packets to client.\n", m_tuner, NUM_PACKETS_TO_SEND);
 
 	// Begin to receive and send TS packets
 	// Initialize the buffer
@@ -694,11 +618,7 @@ int CTransport::TreatReceivedDataHTTP()
 				recv_size = readBufferSize - readBufferPos;
 		}
 
-		if (m_Traces->IsLevelWriteable(LEVEL_TRZ_6))
-		{
-			_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Next recv_size:           %5d bytes.                             (Read Buffer size: %05d).\n", m_tuner, recv_size, readBufferPos);
-			m_Traces->WriteTrace(log_output, LEVEL_TRZ_6);
-		}
+		LOGM(TRZ6,1,"[Tuner %d] Next recv_size:           %5d bytes.                             (Read Buffer size: %05d).\n", m_tuner, recv_size, readBufferPos);
 
 		int ok_read = -1;
 		int r_offset = 0;
@@ -713,11 +633,7 @@ int CTransport::TreatReceivedDataHTTP()
 				if (((err == WSAEINTR) || (err == WSAETIMEDOUT)) && (ok_read < 0))
 				{
 					// Timeout expire!
-					if (m_Traces->IsLevelWriteable(LEVEL_TRZ_6))
-					{
-						_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Failed read in Stream Socket: %d,%d. Try to continue.\n", m_tuner, r_size, err);
-						m_Traces->WriteTrace(log_output, LEVEL_TRZ_6);
-					}
+					LOGM(TRZ6,1,"[Tuner %d] Failed read in Stream Socket: %d,%d. Try to continue.\n", m_tuner, r_size, err);
 					ok_read++;
 					//shutdown(m_socketHTTP, SD_BOTH);
 					//closesocket(m_socketHTTP);
@@ -727,11 +643,7 @@ int CTransport::TreatReceivedDataHTTP()
 				else
 				{
 					// Another Error in socket!
-					if (m_Traces->IsLevelWriteable(LEVEL_TRZ_4))
-					{
-						_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Error in Stream Socket: %d:%d. Closing connection.\n", m_tuner, r_size, err);
-						m_Traces->WriteTrace(log_output, LEVEL_TRZ_4);
-					}
+					LOGM(TRZ4,1,"[Tuner %d] Error in Stream Socket: %d:%d. Closing connection.\n", m_tuner, r_size, err);
 					shutdown(m_socketHTTP, SD_BOTH);
 					closesocket(m_socketHTTP);
 					m_socketHTTP = -1;
@@ -752,21 +664,13 @@ int CTransport::TreatReceivedDataHTTP()
 			else
 			{
 				r_offset = total_r % 188;
-				if (m_Traces->IsLevelWriteable(LEVEL_TRZ_4))
-				{
-					_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Partial packet read in Socket retry to read for %5d bytes pending.\n", m_tuner, 188 - r_offset);
-					m_Traces->WriteTrace(log_output, LEVEL_TRZ_4);
-				}
+				LOGM(TRZ4,1,"[Tuner %d] Partial packet read in Socket retry to read for %5d bytes pending.\n", m_tuner, 188 - r_offset);
 			}
 	        }
 		recv_size = r_size;
 		if (r_offset > 0)
 		{
-			if (m_Traces->IsLevelWriteable(LEVEL_TRZ_4))
-			{
-				_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Continue after Partial reading from Socket, new %5d bytes readed (Read Buffer size: %05d).\n", m_tuner, recv_size, readBufferPos + recv_size);
-				m_Traces->WriteTrace(log_output, LEVEL_TRZ_4);
-			}
+			LOGM(TRZ4,1,"[Tuner %d] Continue after Partial reading from Socket, new %5d bytes readed (Read Buffer size: %05d).\n", m_tuner, recv_size, readBufferPos + recv_size);
 		}
 
 /*
@@ -783,8 +687,7 @@ int CTransport::TreatReceivedDataHTTP()
 				if (kkp > 15) kkp=0;
 				if (kkp != cc)
 				{
-					_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] CC Error! pre=%d curr=%d (kk=%d) recv=%d\n", m_tuner, kkp, cc, kk, recv_size);
-					m_Traces->WriteTrace(log_output, LEVEL_TRZ_3);
+					LOGM(TRZ3,0,"[Tuner %d] CC Error! pre=%d curr=%d (kk=%d) recv=%d\n", m_tuner, kkp, cc, kk, recv_size);
 //					m_basicRingBuffer->m_lockaheads++;
 				}
 				kkp = cc;
@@ -804,7 +707,7 @@ int CTransport::TreatReceivedDataHTTP()
 
 		if ( recv_size == 0 )  // Timeout of read call
 		{
-			m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Read from Stream Socket timeout!\n", LEVEL_TRZ_4);
+			LOGM(TRZ4,0,"[Tuner %d] Read from Stream Socket timeout!\n", m_tuner);
 			receivingDataHTTP = 0;
 			notstream++;
 
@@ -826,15 +729,14 @@ int CTransport::TreatReceivedDataHTTP()
 			}
 			if (ntry>=5)
 			{
-				_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Error=%d sending alive NULL packet to UDP with padding %s:%d\n", m_tuner, WSAGetLastError(), m_ipSend, m_portSend);
-				m_Traces->WriteTrace(log_output, ERR);
+				LOGM(ERR,0,"[Tuner %d] Error=%d sending alive NULL packet to UDP with padding %s:%d\n", m_tuner, WSAGetLastError(), m_ipSend, m_portSend);
 
 				return 0;
 			}
 			
 			if ( notstream >= 20 )  // If not receiving the streaming for several time then exit!
 			{
-				m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Closing Stream Socket because several timeouts.\n", LEVEL_TRZ_3);
+				LOGM(TRZ3,0,"[Tuner %d] Closing Stream Socket because several timeouts.\n", m_tuner);
 				shutdown(m_socketHTTP, SD_BOTH);
 				closesocket(m_socketHTTP);
 				m_socketHTTP = -1;
@@ -843,11 +745,7 @@ int CTransport::TreatReceivedDataHTTP()
 
 			continue;
 		}
-		if (m_Traces->IsLevelWriteable(LEVEL_TRZ_5))
-		{
-			_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Received from TCP Socket: %5d bytes.                             (Read Buffer size: %05d).\n", m_tuner, recv_size, readBufferPos + recv_size);
-			m_Traces->WriteTrace(log_output, LEVEL_TRZ_5);
-		}
+		LOGM(TRZ5,1,"[Tuner %d] Received from TCP Socket: %5d bytes.                             (Read Buffer size: %05d).\n", m_tuner, recv_size, readBufferPos + recv_size);
 
 		// Incoming data from socket, update internal data
 		receivingDataHTTP = 1;
@@ -855,7 +753,7 @@ int CTransport::TreatReceivedDataHTTP()
 		readBufferPos += recv_size;
 		if ( readBufferPos > readBufferSize )
 		{
-			m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] ERROR Read Buffer overflow! (empty half of the buffer).\n", LEVEL_TRZ_2);
+			LOGM(TRZ2,0,"[Tuner %d] ERROR Read Buffer overflow! (empty half of the buffer).\n", m_tuner);
 			readBufferPos = (readBufferSize / 2) - 1;
 			memmove(&readBuffer[0], &readBuffer[readBufferPos], readBufferPos);
 			memset(&readBuffer[readBufferPos], 0, readBufferSize - readBufferPos);
@@ -893,27 +791,16 @@ int CTransport::TreatReceivedDataHTTP()
 			
 			if ( HTTPHeaderEnd > 0 )
 			{
-				if (m_Traces->IsLevelWriteable(LEVEL_TRZ_4))
-				{
-					_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Header of HTTP response received, size: %d bytes.\n", m_tuner, HTTPHeaderEnd);
-					m_Traces->WriteTrace(log_output, LEVEL_TRZ_4);
-				}
-				if (m_Traces->IsLevelWriteable(LEVEL_TRZ_6))
-				{
-					_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Complete header of HTTP response >>> \n%s\n<<< (EOF HTTP response)\n", m_tuner, readBuffer);
-					m_Traces->WriteTrace(log_output, LEVEL_TRZ_6);
-				}
+				LOGM(TRZ4,1,"[Tuner %d] Header of HTTP response received, size: %d bytes.\n", m_tuner, HTTPHeaderEnd);
+
+				LOGM(TRZ6,1,"[Tuner %d] Complete header of HTTP response >>> \n%s\n<<< (EOF HTTP response)\n", m_tuner, readBuffer);
 			}
 			
 			if ( HTTPHeaderEnd < 0 ) // Non Valid HTTP Header found, then closing connection
 			{
-				m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Closing Stream Socket because non valid HTTP response.\n", LEVEL_TRZ_3);
+				LOGM(TRZ3,1,"[Tuner %d] Closing Stream Socket because non valid HTTP response.\n", m_tuner);
 
-				if (m_Traces->IsLevelWriteable(LEVEL_TRZ_6))
-				{
-					_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Complete readed data from TCP socket >>> \n%s\n<<< (EOF TCP data)\n", m_tuner, readBuffer);
-					m_Traces->WriteTrace(log_output, LEVEL_TRZ_6);
-				}
+				LOGM(TRZ6,1,"[Tuner %d] Complete readed data from TCP socket >>> \n%s\n<<< (EOF TCP data)\n", m_tuner, readBuffer);
 
 				shutdown(m_socketHTTP, SD_BOTH);
 				closesocket(m_socketHTTP);
@@ -925,7 +812,7 @@ int CTransport::TreatReceivedDataHTTP()
 				memmove(&readBuffer[0], &readBuffer[HTTPHeaderEnd+1], readBufferPos-HTTPHeaderEnd);
 				readBufferPos = readBufferPos-HTTPHeaderEnd;
 				isBody = 1;
-				m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Starting to receive the stream.\n", LEVEL_TRZ_6);
+				LOGM(TRZ6,0,"[Tuner %d] Starting to receive the stream.\n", m_tuner);
 				// Init internal timers
 				m_basicRingBuffer->SaveTimeToSend();
 				m_basicRingBuffer->InitHTTPMessage();
@@ -953,16 +840,12 @@ int CTransport::TreatReceivedDataHTTP()
 			
 			if ( notValidTS > 0 )
 			{
-				if      (notValidTS == 1) m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Incoming data: garbage or need to Resynchronize (SYNC LOST) [ waiting data ].\n", LEVEL_TRZ_4);
-				else if (notValidTS == 2) m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Incoming data: garbage or need to Resynchronize (SYNC LOST) [  length<188  ].\n", LEVEL_TRZ_4);
-				else if (notValidTS == 3) m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Incoming data: garbage or need to Resynchronize (SYNC LOST) [ !length%188  ].\n", LEVEL_TRZ_4);
-				else                      m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Incoming data: garbage or need to Resynchronize (SYNC LOST) [fail sync mark].\n", LEVEL_TRZ_3);
+				if      (notValidTS == 1) { LOGM(TRZ4,0,"[Tuner %d] Incoming data: garbage or need to Resynchronize (SYNC LOST) [ waiting data ].\n", m_tuner); }
+				else if (notValidTS == 2) { LOGM(TRZ4,0,"[Tuner %d] Incoming data: garbage or need to Resynchronize (SYNC LOST) [  length<188  ].\n", m_tuner); }
+				else if (notValidTS == 3) { LOGM(TRZ4,0,"[Tuner %d] Incoming data: garbage or need to Resynchronize (SYNC LOST) [ !length%188  ].\n", m_tuner); }
+				else                      { LOGM(TRZ3,0,"[Tuner %d] Incoming data: garbage or need to Resynchronize (SYNC LOST) [fail sync mark].\n", m_tuner); }
 
-				if (m_Traces->IsLevelWriteable(LEVEL_TRZ_4))
-				{
-					_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] re-SYNC: Starting to search >>>                                    (Read Buffer size: %05d).\n", m_tuner, readBufferPos);
-					m_Traces->WriteTrace(log_output, LEVEL_TRZ_4);
-				}
+				LOGM(TRZ4,1,"[Tuner %d] re-SYNC: Starting to search >>>                                    (Read Buffer size: %05d).\n", m_tuner, readBufferPos);
 				notValidTS = 1;
 
 				// Search for ANY valid packet in the Buffer
@@ -976,11 +859,7 @@ int CTransport::TreatReceivedDataHTTP()
 							// Insuficient data for resync
 							notValidTS = 1;
 							newSyncPos = i;
-							if (m_Traces->IsLevelWriteable(LEVEL_TRZ_4))
-							{
-								_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] re-SYNC: Low data, SYNC possible @%05d                            (Read Buffer size: %05d).\n", m_tuner, i, readBufferPos);
-								m_Traces->WriteTrace(log_output, LEVEL_TRZ_4);
-							}
+							LOGM(TRZ4,1,"[Tuner %d] re-SYNC: Low data, SYNC possible @%05d                            (Read Buffer size: %05d).\n", m_tuner, i, readBufferPos);
 							break;
 						}
 						else
@@ -990,11 +869,7 @@ int CTransport::TreatReceivedDataHTTP()
 								// SYNC OK
 								notValidTS = 0;
 								newSyncPos = i;
-								if (m_Traces->IsLevelWriteable(LEVEL_TRZ_4))
-								{
-									_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] re-SYNC: Inconming data OK at %5d                                (Read Buffer size: %05d).\n", m_tuner, i, readBufferPos);
-									m_Traces->WriteTrace(log_output, LEVEL_TRZ_4);
-								}
+								LOGM(TRZ4,1,"[Tuner %d] re-SYNC: Inconming data OK at %5d                                (Read Buffer size: %05d).\n", m_tuner, i, readBufferPos);
 								break;
 							}
 							// Advance to next position! 
@@ -1006,11 +881,7 @@ int CTransport::TreatReceivedDataHTTP()
 				if ((newSyncPos >= readBufferPos) && (readBufferPos > 0))
 				{
 					// Not found any SYNC mark! Discard all data!
-					if (m_Traces->IsLevelWriteable(LEVEL_TRZ_4))
-					{
-						_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] re-SYNC: Not found SYNC on buffer, erasing %5d bytes of data.\n", m_tuner, readBufferPos);
-						m_Traces->WriteTrace(log_output, LEVEL_TRZ_4);
-					}
+					LOGM(TRZ4,1,"[Tuner %d] re-SYNC: Not found SYNC on buffer, erasing %5d bytes of data.\n", m_tuner, readBufferPos);
 					readBufferPos = 0;
 					memset(&readBuffer[0], 0, readBufferSize);
 				}
@@ -1019,11 +890,7 @@ int CTransport::TreatReceivedDataHTTP()
 					// Remove ancient data positioning at new SYNC mark!
 					memmove(&readBuffer[0], &readBuffer[newSyncPos], readBufferPos - newSyncPos);
 					readBufferPos = readBufferPos - newSyncPos;
-					if (m_Traces->IsLevelWriteable(LEVEL_TRZ_4))
-					{
-						_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] re-SYNC: Removing %5d bytes at start                             (Read Buffer size: %05d).\n", m_tuner, newSyncPos, readBufferPos);
-						m_Traces->WriteTrace(log_output, LEVEL_TRZ_4);
-					}
+					LOGM(TRZ4,1,"[Tuner %d] re-SYNC: Removing %5d bytes at start                             (Read Buffer size: %05d).\n", m_tuner, newSyncPos, readBufferPos);
 					memset(&readBuffer[readBufferPos], 0, readBufferSize - readBufferPos);
 				}
 
@@ -1047,7 +914,7 @@ int CTransport::TreatReceivedDataHTTP()
 					if ((j == complet) && (notValidTS == 0)) // All OK!
 					{
 						newSyncPos = 0;
-						m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] re-SYNC: >>> Completed ALL OK!\n", LEVEL_TRZ_4);
+						LOGM(TRZ4,0,"[Tuner %d] re-SYNC: >>> Completed ALL OK!\n", m_tuner);
 
 						if ((incomplet != 0) && (readBuffer[188 * j] == 'G'))
 						{
@@ -1061,11 +928,7 @@ int CTransport::TreatReceivedDataHTTP()
 						//  Garbage data! Remove it.
 						newSyncPos = 0;
 						int last_good = 188 * j;
-						if (m_Traces->IsLevelWriteable(LEVEL_TRZ_4))
-						{
-							_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] re-SYNC: Deleting %5d bytes, from %5d to %5d                 (Read Buffer size: %05d).\n", m_tuner, readBufferPos - last_good, last_good, readBufferPos, last_good );
-							m_Traces->WriteTrace(log_output, LEVEL_TRZ_4);
-						}
+						LOGM(TRZ4,1,"[Tuner %d] re-SYNC: Deleting %5d bytes, from %5d to %5d                 (Read Buffer size: %05d).\n", m_tuner, readBufferPos - last_good, last_good, readBufferPos, last_good );
 						readBufferPos = last_good;
 						memset(&readBuffer[readBufferPos], 0, readBufferSize - readBufferPos);
 					}
@@ -1079,7 +942,7 @@ int CTransport::TreatReceivedDataHTTP()
 			{
 				// Not found sync!
 				maxSync++;
-				m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] re-SYNC: Not found mark, retrying... \n", LEVEL_TRZ_5);
+				LOGM(TRZ5,0,"[Tuner %d] re-SYNC: Not found mark, retrying... \n", m_tuner);
 
 				// Send new UDP datagram with null padding, as keepalive to client.
 				int ntry = 0;
@@ -1099,8 +962,7 @@ int CTransport::TreatReceivedDataHTTP()
 				}
 				if (ntry>=5)
 				{
-					_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Error=%d sending initial packet to UDP with padding %s:%d\n", m_tuner, WSAGetLastError(), m_ipSend, m_portSend);
-					m_Traces->WriteTrace(log_output, ERR);
+					LOGM(ERR,0,"[Tuner %d] Error=%d sending initial packet to UDP with padding %s:%d\n", m_tuner, WSAGetLastError(), m_ipSend, m_portSend);
 
 					return 0;
 				}
@@ -1108,7 +970,7 @@ int CTransport::TreatReceivedDataHTTP()
 				if (maxSync > 10)
 				{
 					// Closed socket, excesive errors!
-					m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] re-SYNC: Closing Stream Socket because impossible to sync.\n", LEVEL_TRZ_3);
+					LOGM(TRZ3,0,"[Tuner %d] re-SYNC: Closing Stream Socket because impossible to sync.\n", m_tuner);
 					shutdown(m_socketHTTP, SD_BOTH);
 					closesocket(m_socketHTTP);
 					m_socketHTTP = -1;
@@ -1128,7 +990,7 @@ int CTransport::TreatReceivedDataHTTP()
 				{
 					// Do nothing, only "save" data in the lookahead part of the read buffer!
 					endPos = 0;
-					m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Filling lookahead part of read buffer.\n", LEVEL_TRZ_6);
+					LOGM(TRZ6,0,"[Tuner %d] Filling lookahead part of read buffer.\n", m_tuner);
 				}
 				else if (partial == 0)
 				{
@@ -1140,7 +1002,7 @@ int CTransport::TreatReceivedDataHTTP()
 					// Read with errors, try to use the lookahead buffer.
 					endPos = readBufferMinPos;
 					m_basicRingBuffer->m_lockaheads++;
-					m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Using the lookahead buffer!\n", LEVEL_TRZ_5);
+					LOGM(TRZ5,0,"[Tuner %d] Using the lookahead buffer!\n", m_tuner);
 				}
 
 				if ((endPos > 0) && (endPos <= readBufferPos))
@@ -1151,18 +1013,14 @@ int CTransport::TreatReceivedDataHTTP()
 					if (m_basicRingBuffer->Insert(&readBuffer[0], endPos) > 0)
 					{
 						// Insert OK
-						if (m_Traces->IsLevelWriteable(LEVEL_TRZ_5))
-						{
-							_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Put in Ring Buffer:       %5d bytes.                             (Read Buffer size: %05d).\n", m_tuner, endPos, readBufferPos - endPos);
-							m_Traces->WriteTrace(log_output, LEVEL_TRZ_5);
-						}
+						LOGM(TRZ5,1,"[Tuner %d] Put in Ring Buffer:       %5d bytes.                             (Read Buffer size: %05d).\n", m_tuner, endPos, readBufferPos - endPos);
 						memmove(&readBuffer[0], &readBuffer[endPos], readBufferPos - endPos);
 						readBufferPos = readBufferPos - endPos;
 					}
 					else
 					{
 						// Ring_Buffer full, NO insert
-						m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Ring Buffer full, insert data call fails!\n", LEVEL_TRZ_5);
+						LOGM(TRZ5,0,"[Tuner %d] Ring Buffer full, insert data call fails!\n", m_tuner);
 					}
 				}
 			}
@@ -1177,7 +1035,7 @@ int CTransport::TreatReceivedDataHTTP()
 
 			//tamSend = m_basicRingBuffer->GetMultipleTSPacket(dataR, 7*2);  // Write at double speed (*2)
 			int packets_to_read;
-			packets_to_read = 7 * 24;  // Write at max speed! (dataR size 7*25)
+			packets_to_read = 7 * CHUNK_SIZE;  // Process only a chunk of packets in each loop! (dataR size 7*25)
 			unsigned int numPadding[1] = { 0 };
 			tamSend = m_basicRingBuffer->GetMultipleTSPacket(dataR, packets_to_read, numPadding);
 
@@ -1193,7 +1051,9 @@ int CTransport::TreatReceivedDataHTTP()
 					tamSend -= udp_send;
 
 					if (udp_send < 1316)
-						m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] PROBLEM  :  Sent to client less than 7 packets!!!\n", LEVEL_TRZ_3);
+					{
+						LOGM(TRZ3,0,"[Tuner %d] PROBLEM  :  Sent to client less than 7 packets!!!\n", m_tuner);
+					}
 
 					//This terrible hack tries to overcome the problem when the IP stack reorders/swap UDP packets
 					FILE* nulfile = fopen("NUL:", "w"); fprintf(nulfile," "); fclose(nulfile);
@@ -1209,7 +1069,7 @@ int CTransport::TreatReceivedDataHTTP()
 							0, (SOCKADDR *)& RecvAddr, sizeof(RecvAddr));
 						if (res == SOCKET_ERROR)
 						{
-							m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Write socket re-try.\n", LEVEL_TRZ_3);
+							LOGM(TRZ3,0,"[Tuner %d] Write socket re-try.\n", m_tuner);
 							Sleep(25);
 							ntry++;
 						}
@@ -1217,8 +1077,7 @@ int CTransport::TreatReceivedDataHTTP()
 					}
 					if (ntry>=5)
 					{
-						_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Sent to [UDP://%s:%d] : Error=%d sending packet! \n", m_tuner, m_ipSend, m_portSend, WSAGetLastError());
-						m_Traces->WriteTrace(log_output, ERR);
+						LOGM(ERR,0,"[Tuner %d] Sent to [UDP://%s:%d] : Error=%d sending packet! \n", m_tuner, m_ipSend, m_portSend, WSAGetLastError());
 
 						return 0;
 					}
@@ -1226,11 +1085,7 @@ int CTransport::TreatReceivedDataHTTP()
 					//The hack triggers the file(socket) event loop two times: before and after send each UDP packet!
 					nulfile = fopen("NUL:", "w"); fprintf(nulfile," "); fclose(nulfile);
 
-					if (m_Traces->IsLevelWriteable(LEVEL_TRZ_5))
-					{
-						_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Sent to [UDP://%s:%d] : %5d bytes (waiting:%05d).\n", m_tuner, m_ipSend, m_portSend, udp_send, tamSend);
-						m_Traces->WriteTrace(log_output, LEVEL_TRZ_5);
-					}
+					LOGM(TRZ5,1,"[Tuner %d] Sent to [UDP://%s:%d] : %5d bytes (waiting:%05d).\n", m_tuner, m_ipSend, m_portSend, udp_send, tamSend);
 					offset += udp_send;
 
 					if (numPadding[0] > 0)
@@ -1238,7 +1093,7 @@ int CTransport::TreatReceivedDataHTTP()
 						// Slow down a bit!
 						//Sleep(15);
 						m_basicRingBuffer->m_lockaheads++;
-						m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Slow down a bit.\n", LEVEL_TRZ_4);
+						LOGM(TRZ4,0,"[Tuner %d] Slow down a bit.\n", m_tuner);
 					}
 				}
 			}
@@ -1258,7 +1113,7 @@ void CTransport::StopTransportStreamHTTP()
 	{
 		m_basicRingBuffer->SemaphoreSignal();
 
-		m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Closing HTTP socket.\n", LEVEL_TRZ_5);
+		LOGM(TRZ5,0,"[Tuner %d] Closing HTTP socket.\n", m_tuner);
 
 		if (m_socketHTTP > 0)
 		{
@@ -1274,7 +1129,7 @@ void CTransport::StopTransportStreamHTTP()
 			//m_socketUDP = -1;
 		}
 
-		m_Traces->WriteTrace("DBG        :: [Tuner -] End Closing HTTP socket.\n", LEVEL_TRZ_6);
+		LOGM(TRZ6,0,"[Tuner %d] End Closing HTTP socket.\n", m_tuner);
 	}
 }
 
@@ -1282,7 +1137,7 @@ int CTransport::ChangeSourceTS(int channel, CString pidsToFilterList)
 {
 	int res;
 
-	m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Closing open Stream Sockets because change of Source.\n", LEVEL_TRZ_3);
+	LOGM(TRZ3,0,"[Tuner %d] Closing open Stream Sockets because change of Source.\n", m_tuner);
 	if (m_typeTransportInput == UDP_TS)
 	{
 		StopTransportStreamUDP();
@@ -1298,12 +1153,12 @@ int CTransport::ChangeSourceTS(int channel, CString pidsToFilterList)
 	{
 		if (res == -1)
 		{
-			m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Could be not initiate TRANSPORT phase. Channel not in MAPPING LIST.\n", LEVEL_TRZ_1);
+			LOGM(TRZ1,0,"[Tuner %d] Could be not initiate TRANSPORT phase. Channel not in MAPPING LIST.\n", m_tuner);
 			return -1;
 		}
 		else
 		{
-			m_Traces->WriteTrace("TRANSPORT  :: [Tuner -] Could be not initiate TRANSPORT phase\n", LEVEL_TRZ_1);
+			LOGM(TRZ1,0,"[Tuner %d] Could be not initiate TRANSPORT phase\n", m_tuner);
 			if (res == -2)
 				return-2;
 			else
@@ -1336,13 +1191,7 @@ void CTransport::setPerformSend(int send, int tuner)
 
 		StopThreadTransport();
 
-		if (m_Traces->IsLevelWriteable(LEVEL_TRZ_2))
-		{
-			char log_output[1024];
-			memset(log_output, 0, 1024);
-			_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Stop sending TS Packets to Target.\n", m_tuner); // stop restreaming!
-			m_Traces->WriteTrace(log_output, LEVEL_TRZ_2);
-		}
+		LOGM(TRZ2,1,"[Tuner %d] Stop sending TS Packets to Target.\n", m_tuner); // stop restreaming!
 	}
 };
 
@@ -1430,15 +1279,11 @@ void CTransport::ChangeFilterPIDsList(CString pidsToFilterList, int internalPFil
 
 int CTransport::ReconnectConnectionHTTP()
 {
-	char log_output[1024];
-	memset(log_output, 0, 1024);
-
 	WSADATA wsa;
 
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
 	{
-		_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Error initializing use of WinSock [HTTP].\n", m_tuner);
-		m_Traces->WriteTrace(log_output, ERR);
+		LOGM(ERR,0,"[Tuner %d] Error initializing use of WinSock [HTTP].\n", m_tuner);
 		return 0;
 	}
 
@@ -1446,8 +1291,7 @@ int CTransport::ReconnectConnectionHTTP()
 
 	if ((m_socketHTTP = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 	{
-		_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Error in creation of HTTP(TCP) Socket\n", m_tuner);
-		m_Traces->WriteTrace(log_output, ERR);
+		LOGM(ERR,0,"[Tuner %d] Error in creation of HTTP(TCP) Socket\n", m_tuner);
 		return 0;
 	}
 
@@ -1466,11 +1310,7 @@ int CTransport::ReconnectConnectionHTTP()
 	{
 		int err = WSAGetLastError();
 		
-		if (m_Traces->IsLevelWriteable(ERR))
-		{
-			_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Can not reconnect to http://%s:%d. Error code %d\n", m_tuner, CStringA(cfgProxy->m_infoChannels[m_PosChannelInMapList].ipHTTP), cfgProxy->m_infoChannels[m_PosChannelInMapList].puertoHTTP, err);
-			m_Traces->WriteTrace(log_output, ERR);
-		}
+		LOGM(ERR,1,"[Tuner %d] Can not reconnect to http://%s:%d. Error code %d\n", m_tuner, CStringA(cfgProxy->m_infoChannels[m_PosChannelInMapList].ipHTTP), cfgProxy->m_infoChannels[m_PosChannelInMapList].puertoHTTP, err);
 		return 0;
 	}
 
@@ -1482,8 +1322,6 @@ int CTransport::ReconnectConnectionHTTP()
 
 int CTransport::SendNullPackets()
 {
-	char trace[1024];
-	memset(trace, 0, 1024);
 	int res = 0;
 	//Send an UDP datagram (7 TS packets with null padding).
 	char* nullPaddingPckt = new char[MAX_SIZE_DATAGRAM_TO_SEND];
@@ -1513,18 +1351,13 @@ int CTransport::SendNullPackets()
 	{
 		if (getState() != 0)
 		{
-			snprintf(trace, sizeof(trace) - 2, "TRANSPORT  :: [Tuner %d] Error=%d sending null packet to UDP with padding %s:%d\n", m_tuner, WSAGetLastError(), m_ipSend, m_portSend);
-			m_Traces->WriteTrace(trace, ERR);
+			LOGM(ERR,0,"[Tuner %d] Error=%d sending null packet to UDP with padding %s:%d\n", m_tuner, WSAGetLastError(), m_ipSend, m_portSend);
 		}
 
 		return 0;
 	}
 	
-	if (m_Traces->IsLevelWriteable(LEVEL_TRZ_4))
-	{
-		snprintf(trace, sizeof(trace) - 2, "TRANSPORT  :: [Tuner %d] Send an UDP datagram with %d null padding packets to client.\n", m_tuner, NUM_PACKETS_TO_SEND);
-		m_Traces->WriteTrace(trace, LEVEL_TRZ_4);
-	}
+	LOGM(TRZ4,1,"[Tuner %d] Send an UDP datagram with %d null padding packets to client.\n", m_tuner, NUM_PACKETS_TO_SEND);
 
 	delete[]nullPaddingPckt;
 
@@ -1534,18 +1367,12 @@ void CTransport::ReconnectHTTP()
 {
 	int attemptsReconn = 0;
 	int reconnect = 0;
-	char log_output[1024];
-	memset(log_output, 0, 1024);
 
 	shutdown(m_socketHTTP, SD_BOTH);
 	closesocket(m_socketHTTP);
 	m_socketHTTP = -1;
 
-	if (m_Traces->IsLevelWriteable(LEVEL_TRZ_3) && (getState() != 0))
-	{
-		_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Try to reconnect connection HTTP.\n", m_tuner);
-		m_Traces->WriteTrace(log_output, LEVEL_TRZ_3);
-	}
+	LOGM(TRZ3,1,"[Tuner %d] Try to reconnect connection HTTP.\n", m_tuner);
 
 	while (attemptsReconn < 20 && !reconnect)
 	{
@@ -1556,10 +1383,9 @@ void CTransport::ReconnectHTTP()
 
 	if (!reconnect)
 	{
-		if (m_Traces->IsLevelWriteable(LEVEL_TRZ_2) && (getState() != 0))
+		if (getState() != 0)
 		{
-			_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Not possible to reconnect connection HTTP.\n", m_tuner);
-			m_Traces->WriteTrace(log_output, LEVEL_TRZ_2);
+			LOGM(TRZ2,1,"[Tuner %d] Not possible to reconnect connection HTTP.\n", m_tuner);
 		}
 		m_failedConnectHTTP = 1;
 		m_refreshFailedConnHTTP = 1;
@@ -1567,10 +1393,9 @@ void CTransport::ReconnectHTTP()
 	}
 	else
 	{
-		if (m_Traces->IsLevelWriteable(LEVEL_TRZ_2) && (getState() != 0))
+		if (getState() != 0)
 		{
-			_snprintf(log_output, sizeof(log_output) - 2, "TRANSPORT  :: [Tuner %d] Connection HTTP is reconnected.\n", m_tuner);
-			m_Traces->WriteTrace(log_output, LEVEL_TRZ_2);
+			LOGM(TRZ2,1,"[Tuner %d] Connection HTTP is reconnected.\n", m_tuner);
 		}
 	}
 	m_errConnectionIni = 0;

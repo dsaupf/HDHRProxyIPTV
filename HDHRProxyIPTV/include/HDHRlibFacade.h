@@ -70,4 +70,7 @@ public:
 	int CreateMessageResponseHDHR(InfoMessageHDHR* infoReqMsg, struct hdhomerun_pkt_t **msg, CTuner* infTuner, CTrace* trz);
 	int ObtainTypeMessage(struct hdhomerun_pkt_t *rx_pkt, CTrace *trz, InfoMessageHDHR** infoMsg);
 	void StopSocketServTCP_Control();
+
+#define LOGD(trace, level, only, text, ...) if (trace) { LOGG(trace, "HDHR-LIB-D ::", level, only, text, ##__VA_ARGS__) }
+#define LOGC(trace, level, only, text, ...) if (trace) { LOGG(trace, "HDHR-LIB   ::", level, only, text, ##__VA_ARGS__) }
 };

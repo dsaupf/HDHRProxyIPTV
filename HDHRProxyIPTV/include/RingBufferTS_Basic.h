@@ -40,6 +40,8 @@
 #define MAX_SIZE_DATAGRAM_TO_SEND 7*188 //1316
 #define NUM_PACKETS_TO_SEND 7			//Packets of transport stream to send by UDP to the client
 #define PID_MAX	8191
+#define RING_SIZE 157920                //120*1316
+#define CHUNK_SIZE 18                   //Number of (7*188) packets to process at the same time
 
 union timeunion {
 	FILETIME fileTime;
@@ -52,7 +54,7 @@ class CRingBufferTS_Basic
 public:
 	CConfigProxy* m_cfgProxy;
 
-	char m_buffer[157920];	//120*1316
+	char m_buffer[RING_SIZE];
 	char m_buffer_output[MAX_SIZE_DATAGRAM_TO_SEND];
 	int m_numTSPacketsOutput;
 	int m_posWrite;
@@ -82,7 +84,7 @@ public:
 
 	int GetBusySpaceBuf() { return m_BusySpace; }
 	int GetFreeSpaceBuf() { return m_freeSpace; }
-	int GetUsedSpace() { return ((m_BusySpace * 100)/ 78960); }  // Size (78960) * 100;
+	int GetUsedSpace() { return ((m_BusySpace * 100)/ RING_SIZE); }  // Size * 100;
 
 	void Initialize(CString pidsToFilterList);
 	int Insert(char* data, int size);
@@ -119,6 +121,6 @@ public:
 	SYSTEMTIME m_timeLastAnalysis;
 	void setimeLastAnalysis() { GetLocalTime(&m_timeLastAnalysis); };
 	int CheckTimeToAnalyzeData();
+
+#define LOGM(level, only, text, ...) LOGG(m_Traces, "RINGBUFFER ::", level, only, text, ##__VA_ARGS__)    
 };
-
-
