@@ -38,7 +38,6 @@ CRingBufferTS_Basic::CRingBufferTS_Basic()
 	m_pidsToFilterList.Format(L"");
 	m_applyPidFiltering = 0;
 
-	memset(m_buffer_output, 0, sizeof(m_buffer_output));
 	m_numTSPacketsOutput = 0;
 
 	m_Traces = new CTrace();
@@ -429,23 +428,6 @@ _int64 CRingBufferTS_Basic::CompareSystemTime(SYSTEMTIME st1, SYSTEMTIME st2)
 	res = (ft2.ul.QuadPart - ft1.ul.QuadPart) * 100;
 
 	return res;			
-}
-
-void CRingBufferTS_Basic::SubstractTimeToPacket()
-{
-	timeunion ft1;
-
-	SystemTimeToFileTime(&m_timeLastSending, &ft1.fileTime);
-
-	ft1.ul.LowPart = ft1.fileTime.dwLowDateTime;
-	ft1.ul.HighPart = ft1.fileTime.dwHighDateTime;
-
-	__int64 nanosecs = (ft1.ul.QuadPart * 100) - m_cfgProxy->getMaxTimeToPacket();
-	ft1.ul.QuadPart = nanosecs / 100;
-
-	memcpy(&ft1.fileTime, &ft1.ul, sizeof(ft1.fileTime));
-	
-	FileTimeToSystemTime(&ft1.fileTime, &m_timeLastSending);
 }
 
 inline

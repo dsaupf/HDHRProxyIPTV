@@ -55,7 +55,6 @@ public:
 	CConfigProxy* m_cfgProxy;
 
 	char m_buffer[RING_SIZE];
-	char m_buffer_output[MAX_SIZE_DATAGRAM_TO_SEND];
 	int m_numTSPacketsOutput;
 	int m_posWrite;
 	int m_posRead;
@@ -102,8 +101,6 @@ public:
 	void SaveTimeToSend();
 	int CheckTimeToSend();
 	_int64 CompareSystemTime(SYSTEMTIME st1, SYSTEMTIME st2);
-	void SubstractTimeToPacket();
-	void setTimeLastSending() { GetLocalTime(&m_timeLastSending); };
 	CString GetSetPIFFilteringData(int getset, CString pidsToFilterList, int internalPFiltering);
 
 	unsigned char m_pidsList[1024]; //1024 bytes = 8192 bits = total num of valid PIDs
