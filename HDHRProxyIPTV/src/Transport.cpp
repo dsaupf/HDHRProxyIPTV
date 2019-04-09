@@ -634,7 +634,9 @@ int CTransport::TreatReceivedDataHTTP()
 				{
 					// Timeout expire!
 					LOGM(TRZ6,1,"[Tuner %d] Failed read in Stream Socket: %d,%d. Try to continue.\n", m_tuner, r_size, err);
-					ok_read++;
+					//ok_read++;
+					r_size = 0;
+					ret = 0;
 					//shutdown(m_socketHTTP, SD_BOTH);
 					//closesocket(m_socketHTTP);
 					//m_socketHTTP = -1;
@@ -711,30 +713,11 @@ int CTransport::TreatReceivedDataHTTP()
 			receivingDataHTTP = 0;
 			notstream++;
 
-			//Send out UDP NULL datagram (7 TS packets with null padding). It's like say ALIVE to client.
-			int ntry = 0;
-			while (ntry<5)
-			{
-				if (!getPerformSend()) return -1;
-				res = sendto(m_socketUDP,
-					nullPaddingPckt,
-					MAX_SIZE_DATAGRAM_TO_SEND,
-					0, (SOCKADDR *)& RecvAddr, sizeof(RecvAddr));
-				if (res == SOCKET_ERROR)
-				{
-					Sleep(50);
-					ntry++;
-				}
-				else break;
-			}
-			if (ntry>=5)
-			{
-				LOGM(ERR,0,"[Tuner %d] Error=%d sending alive NULL packet to UDP with padding %s:%d\n", m_tuner, WSAGetLastError(), m_ipSend, m_portSend);
+			// Simulate the reading of a NULL datagram (7 TS packets with null padding). It's like to say ALIVE to client.
+			memmove(&readBuffer[readBufferPos], nullPaddingPckt, 1316);
+			recv_size = 1316;
 
-				return 0;
-			}
-			
-			if ( notstream >= 20 )  // If not receiving the streaming for several time then exit!
+			if ( notstream >= 50 )  // If not receiving the streaming for several time then exit!
 			{
 				LOGM(TRZ3,0,"[Tuner %d] Closing Stream Socket because several timeouts.\n", m_tuner);
 				shutdown(m_socketHTTP, SD_BOTH);
@@ -742,8 +725,6 @@ int CTransport::TreatReceivedDataHTTP()
 				m_socketHTTP = -1;
 				return -1;
 			}
-
-			continue;
 		}
 		LOGM(TRZ5,1,"[Tuner %d] Received from TCP Socket: %5d bytes.                             (Read Buffer size: %05d).\n", m_tuner, recv_size, readBufferPos + recv_size);
 
