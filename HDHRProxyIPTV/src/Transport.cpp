@@ -814,8 +814,8 @@ int CTransport::TreatReceivedDataHTTP()
 				isBody = 1;
 				LOGM(TRZ6,0,"[Tuner %d] Starting to receive the stream.\n", m_tuner);
 				// Init internal timers
-				m_basicRingBuffer->SaveTimeToSend();
 				m_basicRingBuffer->InitHTTPMessage();
+				m_basicRingBuffer->SaveTimeToSend();
 			}
 		}
 		else  // Is body
