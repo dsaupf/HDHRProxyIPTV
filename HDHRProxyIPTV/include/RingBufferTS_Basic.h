@@ -42,6 +42,7 @@
 #define PID_MAX	8191
 #define RING_SIZE 157920                //120*1316
 #define CHUNK_SIZE 18                   //Number of (7*188) packets to process at the same time
+#define TIME_ANALYSIS 3000000000;       //In nanoseconds = 3 seconds
 
 union timeunion {
 	FILETIME fileTime;

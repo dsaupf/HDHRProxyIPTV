@@ -56,7 +56,7 @@ CRingBufferTS_Basic::CRingBufferTS_Basic()
 	m_nullPacketsSent = 0;
 	m_receivedPackets = 0;
 	m_lockaheads = 0;
-	m_timetoCheckAnalysis = 3000000000; //In nanoseconds = 3 seconds
+	m_timetoCheckAnalysis = TIME_ANALYSIS;
 	GetLocalTime(&m_timeLastAnalysis);
 }
 
