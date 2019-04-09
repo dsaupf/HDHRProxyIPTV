@@ -277,11 +277,11 @@ int CRingBufferTS_Basic::PIDFiltering(char* data)
 
 	if (IsPIDEnabled(pid))
 	{
-		LOGM(TRZ6,1,"[Tuner %d] PID FILTERING packet to  PASS  with PID: %d (Add to output buffer)\n", m_tuner, pid);
+		LOGM(TRZ6,1,"[Tuner %d] PID FILTERING packet to  PASS  with PID: %4d (Add to output buffer)\n", m_tuner, pid);
 		return 1;
 	}
 
-	LOGM(TRZ6,1,"[Tuner %d] PID FILTERING packet to FILTER with PID: %d\n", m_tuner, pid);
+	LOGM(TRZ6,1,"[Tuner %d] PID FILTERING packet to FILTER with PID: %4d\n", m_tuner, pid);
 	return 0;
 }
 
