@@ -33,7 +33,7 @@
 #define RTP_TS 2
 #define HTTP_TS 3
 
-#define BLOCKING_WAIT_TIME 4000  // Miliseconds to block TCP socket read operations!
+#define BLOCKING_WAIT_TIME 75  // Miliseconds to block TCP socket read operations!
 
 class CTransport
 {
