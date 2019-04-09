@@ -55,32 +55,101 @@ void CPanelInfoTunerDlg::DoDataExchange(CDataExchange* pDX)
 
 void CPanelInfoTunerDlg::UpdateDataTuner()
 {
-	m_stateCli.SetWindowText(m_CfgProxy->m_infoActualSelCli->state);
+	int force_update = 0;
 	CString ch;
+	CString ch2;
+
+	m_stateCli.GetWindowText(ch);
+	if (m_CfgProxy->m_infoActualSelCli->state.Compare(ch))
+	{
+		m_stateCli.SetWindowText(m_CfgProxy->m_infoActualSelCli->state);
+		force_update = 1;
+	}
+
 	if (m_CfgProxy->m_infoActualSelCli->channel)
 	{
 		if (!m_CfgProxy->m_infoActualSelCli->channelNotInMapList)
-			ch.Format(L"%ld", m_CfgProxy->m_infoActualSelCli->channel);
+			ch2.Format(L"%ld", m_CfgProxy->m_infoActualSelCli->channel);
 		else
-			ch.Format(L"![%ld]", m_CfgProxy->m_infoActualSelCli->channel);
+			ch2.Format(L"![%ld]", m_CfgProxy->m_infoActualSelCli->channel);
 	}
 	else
-		ch.Format(L"");
-	m_channel.SetWindowText(ch);
-	m_pids.SetWindowText(m_CfgProxy->m_infoActualSelCli->pids);
-	m_TargetCli.SetWindowText(m_CfgProxy->m_infoActualSelCli->target);
-	m_lockkey.SetWindowText(m_CfgProxy->m_infoActualSelCli->lockkey);
-	m_program.SetWindowText(m_CfgProxy->m_infoActualSelCli->program);
-	m_pidsProgram.SetWindowText(m_CfgProxy->m_infoActualSelCli->pidsProgram);
-	m_ProtTSCli.SetWindowText(m_CfgProxy->m_infoActualSelCli->protocolTS);
+		ch2.Format(L"");
+	m_channel.GetWindowText(ch);
+	if (ch2.Compare(ch))
+	{
+		m_channel.SetWindowText(ch2);
+		force_update = 1;
+	}
+
+	m_pids.GetWindowText(ch);
+	if (m_CfgProxy->m_infoActualSelCli->pids.Compare(ch))
+	{
+		m_pids.SetWindowText(m_CfgProxy->m_infoActualSelCli->pids);
+		force_update = 1;
+	}
+
+	m_TargetCli.GetWindowText(ch);
+	if (m_CfgProxy->m_infoActualSelCli->target.Compare(ch))
+	{
+		m_TargetCli.SetWindowText(m_CfgProxy->m_infoActualSelCli->target);
+		force_update = 1;
+	}
+
+	m_lockkey.GetWindowText(ch);
+	if (m_CfgProxy->m_infoActualSelCli->lockkey.Compare(ch))
+	{
+		m_lockkey.SetWindowText(m_CfgProxy->m_infoActualSelCli->lockkey);
+		force_update = 1;
+	}
+
+	m_program.GetWindowText(ch);
+	if (m_CfgProxy->m_infoActualSelCli->program.Compare(ch))
+	{
+		m_program.SetWindowText(m_CfgProxy->m_infoActualSelCli->program);
+		force_update = 1;
+	}
+
+	m_pidsProgram.GetWindowText(ch);
+	if (m_CfgProxy->m_infoActualSelCli->pidsProgram.Compare(ch))
+	{
+		m_pidsProgram.SetWindowText(m_CfgProxy->m_infoActualSelCli->pidsProgram);
+		force_update = 1;
+	}
+
+	m_ProtTSCli.GetWindowText(ch);
+	if (m_CfgProxy->m_infoActualSelCli->protocolTS.Compare(ch))
+	{
+		m_ProtTSCli.SetWindowText(m_CfgProxy->m_infoActualSelCli->protocolTS);
+		force_update = 1;
+	}
+
 	if (!m_CfgProxy->m_infoActualSelCli->protocolTS.Compare(L"HTTP"))
-		m_HTTPTSCli.SetWindowText(m_CfgProxy->m_infoActualSelCli->httpTS);
+	{
+		m_HTTPTSCli.GetWindowText(ch);
+		if (m_CfgProxy->m_infoActualSelCli->httpTS.Compare(ch))
+		{
+			m_HTTPTSCli.SetWindowText(m_CfgProxy->m_infoActualSelCli->httpTS);
+			force_update = 1;
+		}
+	}
 	else
-		m_HTTPTSCli.SetWindowText(m_CfgProxy->m_infoActualSelCli->udpTS);
+	{
+		m_HTTPTSCli.GetWindowText(ch);
+		if (m_CfgProxy->m_infoActualSelCli->udpTS.Compare(ch))
+		{
+			m_HTTPTSCli.SetWindowText(m_CfgProxy->m_infoActualSelCli->udpTS);
+			force_update = 1;
+		}
+	}
+
 	m_readbuffer.SetWindowText(m_CfgProxy->m_infoActualSelCli->readbuffer);
 	m_ringbuffer.SetWindowText(m_CfgProxy->m_infoActualSelCli->ringbuffer);
 
-	m_HTTPTSCli.RedrawWindow();
-	m_program.RedrawWindow();
-	RedrawWindow();
+	if (force_update)
+	{
+		m_HTTPTSCli.RedrawWindow();
+		m_program.RedrawWindow();
+		RedrawWindow();
+	}
 }
