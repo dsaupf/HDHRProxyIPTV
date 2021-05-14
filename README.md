@@ -16,6 +16,7 @@ Notes:
   (http://www.silicondust.com/support/downloads/linux/ -> get libhdhomerun source), 
   specifically the version 20100213.
   (Current versions include the library headers and the .lib binary inside the "\HDHRProxyIPTV\libs" subdirectory)
+  Fetch the last version of the library from: https://github.com/Silicondust/libhdhomerun
 
 * The project can be compiled with Visual Studio 2013, 2015 & 2017 Community Edition.
 
